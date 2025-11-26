@@ -27,7 +27,7 @@ export default function Login() {
     setPassword("");
 
     // Optionally navigate to feed/page
-    setTimeout(() => navigate("/profile"), 500);
+    setTimeout(() => navigate("/home"), 500);
   };
 
   return (

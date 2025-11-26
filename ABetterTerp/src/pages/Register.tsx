@@ -65,7 +65,7 @@ export default function Register() {
             <input
             className="auth-input"
             type="password"
-            placeholder="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
