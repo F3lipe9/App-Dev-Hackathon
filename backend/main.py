@@ -31,6 +31,7 @@ DATA_DIR.mkdir(exist_ok=True)
 
 USERS_CSV = DATA_DIR / "users.csv"
 HABITS_CSV = DATA_DIR / "habits.csv"
+AFFIRMATIONS_CSV = DATA_DIR / "affirmations.csv"
 
 
 # Ensure CSV files exist with headers
@@ -43,6 +44,26 @@ if not HABITS_CSV.exists():
     with open(HABITS_CSV, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["username", "id", "title", "description"])  # habits per user
+
+if not AFFIRMATIONS_CSV.exists():
+    # create with some default affirmations
+    defaults = [
+        "I am capable of achieving my goals.",
+        "I grow stronger and wiser every day.",
+        "I choose progress over perfection.",
+        "I embrace challenges and learn from them.",
+        "I am worthy of success and happiness.",
+        "I bring value to my work and my community.",
+        "Today I will be kind to myself and others.",
+        "My potential to succeed is infinite.",
+        "I trust my intuition and make clear decisions.",
+        "I am focused, persistent, and will never quit."
+    ]
+    with open(AFFIRMATIONS_CSV, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["text"])
+        for a in defaults:
+            writer.writerow([a])
 
 
 
@@ -94,6 +115,14 @@ def register_user(data: RegisterRequest):
     append_csv(USERS_CSV, data.dict())
     return {"message": "User registered successfully"}
 
+# LOGIN USER
+@app.post("/login")
+def login_user(data: LoginRequest):
+    users = read_csv(USERS_CSV)
+    user = next((u for u in users if u["username"] == data.username and u["password"] == data.password), None)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": f"Login successful for {data.username}"}
 
 # HABITS endpoints
 @app.get("/habits")
@@ -113,11 +142,17 @@ def create_habit(h: HabitCreate):
     append_csv(HABITS_CSV, row)
     return {"message": "Habit created", "habit": row}
 
-# LOGIN USER
-@app.post("/login")
-def login_user(data: LoginRequest):
-    users = read_csv(USERS_CSV)
-    user = next((u for u in users if u["username"] == data.username and u["password"] == data.password), None)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"message": f"Login successful for {data.username}"}
+
+# AFFIRMATIONS endpoints
+@app.get("/affirmations")
+def get_affirmations():
+    # read the affirmations.csv and return list of text
+    with open(AFFIRMATIONS_CSV, newline="") as f:
+        reader = csv.DictReader(f)
+        return [r["text"] for r in reader]
+
+
+class AffirmationCreate(BaseModel):
+    text: str
+
+
