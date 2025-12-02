@@ -30,18 +30,21 @@ DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 
 USERS_CSV = DATA_DIR / "users.csv"
-TWEETS_CSV = DATA_DIR / "tweets.csv"
+HABITS_CSV = DATA_DIR / "habits.csv"
+
 
 # Ensure CSV files exist with headers
 if not USERS_CSV.exists():
     with open(USERS_CSV, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["username", "email"])  # Only username and email
+        writer.writerow(["username", "email", "password"])  # Only username and email
 
-if not TWEETS_CSV.exists():
-    with open(TWEETS_CSV, "w", newline="") as f:
+if not HABITS_CSV.exists():
+    with open(HABITS_CSV, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["username", "image_link", "description", "likes"])
+        writer.writerow(["username", "id", "title", "description"])  # habits per user
+
+
 
 # ---------------------------
 # Models
@@ -54,6 +57,11 @@ class RegisterRequest(BaseModel):
     username: str
     email: str
     password: str
+
+class HabitCreate(BaseModel):
+    username: str
+    title: str
+    description: str | None = ""
 
 # ---------------------------
 # Helper Functions
@@ -85,6 +93,25 @@ def register_user(data: RegisterRequest):
 
     append_csv(USERS_CSV, data.dict())
     return {"message": "User registered successfully"}
+
+
+# HABITS endpoints
+@app.get("/habits")
+def get_habits(username: str):
+    # return list of habits for a username
+    habits = read_csv(HABITS_CSV)
+    user_habits = [h for h in habits if h["username"] == username]
+    return user_habits
+
+
+@app.post("/habits")
+def create_habit(h: HabitCreate):
+    # generate a simple id
+    import uuid
+    hid = str(uuid.uuid4())
+    row = {"username": h.username, "id": hid, "title": h.title, "description": h.description or ""}
+    append_csv(HABITS_CSV, row)
+    return {"message": "Habit created", "habit": row}
 
 # LOGIN USER
 @app.post("/login")
