@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import csv
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -82,7 +82,7 @@ class RegisterRequest(BaseModel):
 class HabitCreate(BaseModel):
     username: str
     title: str
-    description: str | None = ""
+    description: Optional[str] = ""
 
 # ---------------------------
 # Helper Functions
