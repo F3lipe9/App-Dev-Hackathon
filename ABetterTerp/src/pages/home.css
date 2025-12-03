@@ -98,3 +98,35 @@
 @media (max-width: 680px) {
   .sections-grid { grid-template-columns: 1fr; }
 }
+
+.home-root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center; 
+  align-items: center;      
+  background-color: #F8F9FA; 
+}
+
+.home-container {
+  width: 100%;
+}
+
+.home-card {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.home-heading {
+  color: #E21833; 
+}
+
+.home-card h2 {
+  color: #000000;
+  margin-top: 1.5rem;
+  text-align: center;
+}
