@@ -146,29 +146,29 @@ export default function Home() {
                 <div className="home-card">
                     <h1 className="home-heading">Hello{username ? `, ${username}` : ", Guest"}</h1>
 
-                    <div style={{ marginTop: '1rem', textAlign: 'left' }}>
-                        <h2 style={{ fontSize: '1rem', margin: 0, fontWeight: 700 }}>Daily Affirmation -</h2>
-                        <p className="affirmation" aria-live="polite" style={{ marginTop: '0.5rem' }}>{todaysAffirmation}</p>
+                    <div className="section-block">
+                        <h2 className="affirmation-heading">Daily Affirmation -</h2>
+                        <p className="affirmation" aria-live="polite">{todaysAffirmation}</p>
                     </div>
 
-                    <div style={{ marginTop: '1rem', textAlign: 'left' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ fontWeight: 700 }}>Your Daily Habits</div>
+                    <div className="section-block">
+                        <div className="habits-header">
+                            <div className="habits-title">Your Daily Habits</div>
                             <div>
                                 <button className="btn btn-secondary" onClick={onAddHabitClicked}>Add Habit</button>
                             </div>
                         </div>
 
-                        <div style={{ marginTop: '0.5rem' }}>
+                        <div className="section-subblock">
                             <div className="streak">Streak: <strong>{streak}</strong></div>
 
                             <div className="habits-list">
-                                {habits.length === 0 && (<div style={{ color: 'rgba(0,0,0,0.6)' }}>You have no habits yet. Add one to get started.</div>)}
+                                {habits.length === 0 && (<div className="habit-empty">You have no habits yet. Add one to get started.</div>)}
                                 {habits.map(h => (
                                     <label key={h.id} className="habit-item">
                                         <input type="checkbox" checked={!!completed[h.id]} onChange={(e) => markHabit(h.id, e.target.checked)} />
-                                        <span style={{ marginLeft: 8, fontWeight: 600 }}>{h.title}</span>
-                                        <div style={{ fontSize: '0.9rem', color: 'rgba(0,0,0,0.6)' }}>{h.description}</div>
+                                        <span className="habit-title">{h.title}</span>
+                                        <div className="habit-description">{h.description}</div>
                                     </label>
                                 ))}
                             </div>
@@ -180,7 +180,7 @@ export default function Home() {
                         <div className="section section-academic">
                             <h3>Academic</h3>
                             <p>A Smart Terp stays on top of their classes</p>
-                            <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                            <div className="button-row">
                                 <Link to="/assignments"><button className="btn btn-primary">Assignments</button></Link>
                                 <Link to="/exams"><button className="btn btn-secondary">Exams</button></Link>
                             </div>
@@ -189,7 +189,7 @@ export default function Home() {
                         <div className="section section-health">
                             <h3>Health</h3>
                             <p>A Healthy Terp can balance class with their body wellness</p>
-                            <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                            <div className="button-row">
                                 <Link to="/workouts"><button className="btn btn-primary">Workouts</button></Link>
                                 <Link to="/water"><button className="btn btn-secondary">Water Intake</button></Link>
                             </div>

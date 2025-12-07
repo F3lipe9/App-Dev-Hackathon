@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './WaterIntake.css';
 
 interface HistoryEntry {
@@ -7,6 +7,7 @@ interface HistoryEntry {
 }
 
 export default function WaterIntake() {
+  const [username, setUsername] = useState<string | null>(null);
   const [isSetup, setIsSetup] = useState(false);
   const [bottleName, setBottleName] = useState('');
   const [bottleOz, setBottleOz] = useState('');
@@ -14,28 +15,72 @@ export default function WaterIntake() {
   const [currentOz, setCurrentOz] = useState(0);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
-  console.log('WaterIntake rendering', { isSetup, bottleName });
-  // place holder backend for setup
-  const handleSetup = () => {
+  // Load username and existing water setup
+  useEffect(() => {
+    const u = localStorage.getItem('username');
+    setUsername(u);
+  }, []);
+
+  useEffect(() => {
+    if (!username) return;
+
+    (async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/water?username=${encodeURIComponent(username)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setBottleName(data.bottleName || '');
+          setBottleOz(data.bottleOz ? String(data.bottleOz) : '');
+          setDailyGoal(data.dailyGoal ? String(data.dailyGoal) : '');
+          setCurrentOz(data.currentOz || 0);
+          setIsSetup(!!data.dailyGoal && !!data.bottleName);
+        }
+      } catch (err) {
+        console.error('Failed to load water intake', err);
+      }
+    })();
+  }, [username]);
+
+  const saveWater = async (payload: { bottleName: string; bottleOz: number; dailyGoal: number; currentOz: number }) => {
+    if (!username) return;
+    await fetch('http://localhost:8000/water', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, ...payload })
+    });
+  };
+
+  const handleSetup = async () => {
+    if (!username) {
+      alert('Please log in first.');
+      return;
+    }
     if (bottleName && bottleOz && dailyGoal) {
+      const size = parseInt(bottleOz, 10);
+      const goal = parseInt(dailyGoal, 10);
+      if (Number.isNaN(size) || Number.isNaN(goal) || size <= 0 || goal <= 0) return;
       setIsSetup(true);
-      
+      await saveWater({ bottleName, bottleOz: size, dailyGoal: goal, currentOz });
     }
   };
 
-  // place holder backend for adding oz
-  const addOz = () => {
+  const addOz = async () => {
+    if (!isSetup || !username) return;
     const newOz = currentOz + 1;
     setCurrentOz(newOz);
-    
+    const size = parseInt(bottleOz, 10) || 0;
+    const goal = parseInt(dailyGoal, 10) || 0;
+    await saveWater({ bottleName, bottleOz: size, dailyGoal: goal, currentOz: newOz });
   };
 
-  // place holder backend for removing oz
-  const removeOz = () => {
+  const removeOz = async () => {
+    if (!isSetup || !username) return;
     if (currentOz > 0) {
       const newOz = currentOz - 1;
       setCurrentOz(newOz);
-      
+      const size = parseInt(bottleOz, 10) || 0;
+      const goal = parseInt(dailyGoal, 10) || 0;
+      await saveWater({ bottleName, bottleOz: size, dailyGoal: goal, currentOz: newOz });
     }
   };
 
@@ -57,8 +102,9 @@ export default function WaterIntake() {
     return marks;
   };
 
-  const fillPercentage = Math.min((currentOz / parseInt(dailyGoal)) * 100, 100);
-  const totalPercentage = Math.round((currentOz / parseInt(dailyGoal)) * 100);
+  const goalNumber = Math.max(parseInt(dailyGoal, 10) || 1, 1);
+  const fillPercentage = Math.min((currentOz / goalNumber) * 100, 100);
+  const totalPercentage = Math.round((currentOz / goalNumber) * 100);
 
   // place holder backend to get history HERE
 

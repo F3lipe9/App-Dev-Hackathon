@@ -36,10 +36,34 @@
   margin: 0 0 0.5rem 0;
 }
 
-.affirmation {
+.section-block {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.section-subblock {
   margin-top: 0.5rem;
+}
+
+.affirmation {
   font-size: 1rem;
   color: rgba(0,0,0,0.85);
+}
+
+.affirmation-heading {
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.habits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.habits-title {
+  font-weight: 700;
 }
 
 .sections-grid {
@@ -77,6 +101,10 @@
   margin-bottom: 0.5rem;
 }
 
+.habit-empty {
+  color: rgba(0,0,0,0.6);
+}
+
 .habits-list {
   display: flex;
   flex-direction: column;
@@ -92,7 +120,23 @@
   border: 1px solid var(--border);
 }
 
+.habit-title {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.habit-description {
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.6);
+}
+
 .habit-item input { transform: scale(1.05); }
+
+.button-row {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}
 
 /* Responsive: stack sections on small screens */
 @media (max-width: 680px) {
