@@ -40,6 +40,7 @@ db = client.habit_tracker_db
 users_collection = db.get_collection("users")
 habits_collection = db.get_collection("habits")
 affirmations_collection = db.get_collection("affirmations")
+water_collection = db.get_collection("water_intake")
 
 # Type for MongoDB ObjectId
 PyObjectId = Annotated[str, BeforeValidator(str)]
@@ -85,6 +86,21 @@ class AffirmationModel(BaseModel):
 
 class AffirmationCreate(BaseModel):
     text: str
+
+class WaterIntakeModel(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str = Field(...)
+    bottleName: str = Field(..., min_length=1)
+    bottleOz: int = Field(..., ge=1)
+    dailyGoal: int = Field(..., ge=1)
+    currentOz: int = Field(default=0, ge=0)
+
+class WaterIntakeUpsert(BaseModel):
+    username: str
+    bottleName: str
+    bottleOz: int
+    dailyGoal: int
+    currentOz: int | None = 0
 
 # ---------------------------
 # Helper Functions
@@ -273,3 +289,52 @@ async def delete_habit(habit_id: str):
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     
     raise HTTPException(status_code=404, detail=f"Habit {habit_id} not found")
+
+# WATER INTAKE endpoints
+@app.get("/water", response_description="Get water intake settings")
+async def get_water(username: str):
+    """Return water setup for a user."""
+    try:
+        doc = await water_collection.find_one({"username": username})
+        if doc:
+            doc["_id"] = str(doc.get("_id"))
+            return doc
+        return {
+            "username": username,
+            "bottleName": "",
+            "bottleOz": 0,
+            "dailyGoal": 0,
+            "currentOz": 0,
+        }
+    except Exception as e:
+        print(f"Error fetching water intake: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch water intake: {str(e)}")
+
+@app.post("/water", response_description="Upsert water intake settings", status_code=status.HTTP_201_CREATED)
+async def upsert_water(w: WaterIntakeUpsert):
+    """Create or update water intake settings for a user."""
+    try:
+        payload = {
+            "username": w.username,
+            "bottleName": w.bottleName,
+            "bottleOz": w.bottleOz,
+            "dailyGoal": w.dailyGoal,
+            "currentOz": w.currentOz or 0,
+        }
+        result = await water_collection.update_one(
+            {"username": w.username},
+            {"$set": payload},
+            upsert=True,
+        )
+
+        if result.upserted_id:
+            payload["_id"] = str(result.upserted_id)
+        else:
+            existing = await water_collection.find_one({"username": w.username})
+            if existing:
+                payload["_id"] = str(existing.get("_id"))
+
+        return {"message": "Water intake saved", "water": payload}
+    except Exception as e:
+        print(f"Error saving water intake: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save water intake: {str(e)}")
