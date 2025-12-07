@@ -12,7 +12,6 @@ export default function WaterIntake() {
   const [bottleOz, setBottleOz] = useState('');
   const [dailyGoal, setDailyGoal] = useState('');
   const [currentOz, setCurrentOz] = useState(0);
-  const [hasReachedGoal, setHasReachedGoal] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   console.log('WaterIntake rendering', { isSetup, bottleName });
