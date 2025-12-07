@@ -18,8 +18,45 @@ export default function WaterIntake() {
   const [hasReachedGoal, setHasReachedGoal] = useState(false);
   console.log('WaterIntake rendering', { isSetup, bottleName });
 
-  // place holder backend for setup
-  const handleSetup = () => {
+  useEffect(() => {
+    const u = localStorage.getItem('username');
+    setUsername(u);
+  }, []);
+
+  useEffect(() => {
+    if (!username) return;
+    (async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/water?username=${encodeURIComponent(username)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setBottleName(data.bottleName || '');
+          setBottleOz(data.bottleOz ? String(data.bottleOz) : '');
+          setDailyGoal(data.dailyGoal ? String(data.dailyGoal) : '');
+          setCurrentOz(data.currentOz || 0);
+          setIsSetup(!!data.dailyGoal && !!data.bottleName);
+        }
+      } catch (err) {
+        console.error('Failed to load water intake', err);
+      }
+    })();
+  }, [username]);
+
+  const saveWater = async (payload: { bottleName: string; bottleOz: number; dailyGoal: number; currentOz: number }) => {
+    if (!username) return;
+    await fetch('http://localhost:8000/water', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, ...payload })
+    });
+  };
+
+  // Then update handleSetup to be async:
+  const handleSetup = async () => {  // <-- Add 'async' here
+    if (!username) {
+      alert('Please log in first.');
+      return;
+    }
     if (bottleName && bottleOz && dailyGoal) {
       const size = parseInt(bottleOz, 10);
       const goal = parseInt(dailyGoal, 10);
