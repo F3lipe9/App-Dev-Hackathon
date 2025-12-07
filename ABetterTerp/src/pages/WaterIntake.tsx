@@ -14,47 +14,12 @@ export default function WaterIntake() {
   const [dailyGoal, setDailyGoal] = useState('');
   const [currentOz, setCurrentOz] = useState(0);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [hasReachedGoal, setHasReachedGoal] = useState(false);
+  console.log('WaterIntake rendering', { isSetup, bottleName });
 
-  // Load username and existing water setup
-  useEffect(() => {
-    const u = localStorage.getItem('username');
-    setUsername(u);
-  }, []);
-
-  useEffect(() => {
-    if (!username) return;
-
-    (async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/water?username=${encodeURIComponent(username)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setBottleName(data.bottleName || '');
-          setBottleOz(data.bottleOz ? String(data.bottleOz) : '');
-          setDailyGoal(data.dailyGoal ? String(data.dailyGoal) : '');
-          setCurrentOz(data.currentOz || 0);
-          setIsSetup(!!data.dailyGoal && !!data.bottleName);
-        }
-      } catch (err) {
-        console.error('Failed to load water intake', err);
-      }
-    })();
-  }, [username]);
-
-  const saveWater = async (payload: { bottleName: string; bottleOz: number; dailyGoal: number; currentOz: number }) => {
-    if (!username) return;
-    await fetch('http://localhost:8000/water', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, ...payload })
-    });
-  };
-
-  const handleSetup = async () => {
-    if (!username) {
-      alert('Please log in first.');
-      return;
-    }
+  // place holder backend for setup
+  const handleSetup = () => {
     if (bottleName && bottleOz && dailyGoal) {
       const size = parseInt(bottleOz, 10);
       const goal = parseInt(dailyGoal, 10);
@@ -160,7 +125,8 @@ export default function WaterIntake() {
 
   return (
     <div className="water-intake-page">
-      
+      {showConfetti && <Confetti />}
+
       <div className="tracker-container">
         <div className="tracker-card">
           <div className="tracker-header">
@@ -235,3 +201,22 @@ export default function WaterIntake() {
   );
 }
 
+function Confetti() {
+  const pieces = Array.from({ length: 50 });
+  
+  return (
+    <div className="confetti-container">
+      {pieces.map((_, i) => (
+        <div
+          key={i}
+          className="confetti-piece"
+          style={{
+            left: `${Math.random() * 100}%`,
+            backgroundColor: ['#E21833', '#FFD200', '#FFFFFF'][Math.floor(Math.random() * 3)],
+            animationDuration: `${2 + Math.random() * 2}s`
+          }}
+        />
+      ))}
+    </div>
+  );
+}
