@@ -1,75 +1,61 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import csv
-from typing import List
-from pathlib import Path
+import os
+from typing import List, Optional
+from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import Response
+from pydantic import ConfigDict, BaseModel, Field
+from pydantic.functional_validators import BeforeValidator
+from typing_extensions import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 
+from bson import ObjectId
+from pymongo import AsyncMongoClient
+from pymongo import ReturnDocument
+from dotenv import load_dotenv
+import uuid
 
-# CREATE A VIRTUAL ENVIRONMENT AND INSTALL THE REQUIRED FASTAPI PACKAGES
+load_dotenv()
+MONGO_URL = os.getenv("MONGO_URL")
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",  
-    "http://localhost:3000",   
-]
-
+# Add CORS middleware FIRST before any routes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",  
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# ---------------------------
-# CSV "Database" Setup
-# ---------------------------
-DATA_DIR = Path("data")
-DATA_DIR.mkdir(exist_ok=True)
 
-USERS_CSV = DATA_DIR / "users.csv"
-HABITS_CSV = DATA_DIR / "habits.csv"
-AFFIRMATIONS_CSV = DATA_DIR / "affirmations.csv"
+# MongoDB setup
+client = AsyncMongoClient(MONGO_URL)
+db = client.habit_tracker_db
 
+# Collections
+users_collection = db.get_collection("users")
+habits_collection = db.get_collection("habits")
+affirmations_collection = db.get_collection("affirmations")
 
-# Ensure CSV files exist with headers
-if not USERS_CSV.exists():
-    with open(USERS_CSV, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["username", "email", "password"])  # Only username and email
-
-if not HABITS_CSV.exists():
-    with open(HABITS_CSV, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["username", "id", "title", "description"])  # habits per user
-
-if not AFFIRMATIONS_CSV.exists():
-    # create with some default affirmations
-    defaults = [
-        "I am capable of achieving my goals.",
-        "I grow stronger and wiser every day.",
-        "I choose progress over perfection.",
-        "I embrace challenges and learn from them.",
-        "I am worthy of success and happiness.",
-        "I bring value to my work and my community.",
-        "Today I will be kind to myself and others.",
-        "My potential to succeed is infinite.",
-        "I trust my intuition and make clear decisions.",
-        "I am focused, persistent, and will never quit."
-    ]
-    with open(AFFIRMATIONS_CSV, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["text"])
-        for a in defaults:
-            writer.writerow([a])
-
-
+# Type for MongoDB ObjectId
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 # ---------------------------
 # Models
 # ---------------------------
+class UserModel(BaseModel):
+    id: PyObjectId | None = Field(alias="_id", default=None)
+    username: str = Field(..., min_length=1)
+    email: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=1)
+    model_config = ConfigDict(
+        populate_by_name=True,
+    )
+
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -79,81 +65,211 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
+class HabitModel(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str = Field(...)
+    title: str = Field(..., min_length=1)
+    description: str = Field(default="")
+
 class HabitCreate(BaseModel):
     username: str
     title: str
     description: str | None = ""
 
-# ---------------------------
-# Helper Functions
-# ---------------------------
-def read_csv(path: Path) -> List[dict]:
-    with open(path, newline="") as f:
-        reader = csv.DictReader(f)
-        return list(reader)
-
-def append_csv(path: Path, row: dict):
-    with open(path, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=row.keys())
-        writer.writerow(row)
-
-# ---------------------------
-# ROUTES
-# ---------------------------
-# REGISTER USER
-@app.post("/register")
-def register_user(data: RegisterRequest):
-    users = read_csv(USERS_CSV)
-
-    # Check if username or email already exists
-    for u in users:
-        if u["username"] == data.username:
-            raise HTTPException(status_code=400, detail="Username already exists")
-        if u["email"] == data.email:
-            raise HTTPException(status_code=400, detail="Email already registered")
-
-    append_csv(USERS_CSV, data.dict())
-    return {"message": "User registered successfully"}
-
-# LOGIN USER
-@app.post("/login")
-def login_user(data: LoginRequest):
-    users = read_csv(USERS_CSV)
-    user = next((u for u in users if u["username"] == data.username and u["password"] == data.password), None)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"message": f"Login successful for {data.username}"}
-
-# HABITS endpoints
-@app.get("/habits")
-def get_habits(username: str):
-    # return list of habits for a username
-    habits = read_csv(HABITS_CSV)
-    user_habits = [h for h in habits if h["username"] == username]
-    return user_habits
-
-
-@app.post("/habits")
-def create_habit(h: HabitCreate):
-    # generate a simple id
-    import uuid
-    hid = str(uuid.uuid4())
-    row = {"username": h.username, "id": hid, "title": h.title, "description": h.description or ""}
-    append_csv(HABITS_CSV, row)
-    return {"message": "Habit created", "habit": row}
-
-
-
-# AFFIRMATIONS endpoints
-@app.get("/affirmations")
-def get_affirmations():
-    # read the affirmations.csv and return list of text
-    with open(AFFIRMATIONS_CSV, newline="") as f:
-        reader = csv.DictReader(f)
-        return [r["text"] for r in reader]
-
+class AffirmationModel(BaseModel):
+    id: PyObjectId | None = Field(alias="_id", default=None)
+    text: str = Field(..., min_length=1)
+    model_config = ConfigDict(
+        populate_by_name=True,
+    )
 
 class AffirmationCreate(BaseModel):
     text: str
 
+# ---------------------------
+# Helper Functions
+# ---------------------------
+async def initialize_default_affirmations():
+    """Initialize default affirmations if collection is empty"""
+    count = await affirmations_collection.count_documents({})
+    if count == 0:
+        defaults = [
+            "I am capable of achieving my goals.",
+            "I grow stronger and wiser every day.",
+            "I choose progress over perfection.",
+            "I embrace challenges and learn from them.",
+            "I am worthy of success and happiness.",
+            "I bring value to my work and my community.",
+            "Today I will be kind to myself and others.",
+            "My potential to succeed is infinite.",
+            "I trust my intuition and make clear decisions.",
+            "I am focused, persistent, and will never quit."
+        ]
+        
+        for text in defaults:
+            await affirmations_collection.insert_one({"text": text})
 
+# ---------------------------
+# ROUTES
+# ---------------------------
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database with default data on startup"""
+    await initialize_default_affirmations()
+
+# REGISTER USER
+@app.post(
+    "/register",
+    response_description="Register new user",
+    status_code=status.HTTP_201_CREATED,
+)
+async def register_user(data: RegisterRequest):
+    """
+    Register a new user.
+    """
+    # Check if username already exists
+    existing_user = await users_collection.find_one({"username": data.username})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Check if email already exists
+    existing_email = await users_collection.find_one({"email": data.email})
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create new user
+    new_user = {
+        "username": data.username,
+        "email": data.email,
+        "password": data.password  # In production, hash this password!
+    }
+    
+    result = await users_collection.insert_one(new_user)
+    new_user["_id"] = result.inserted_id
+    
+    return {"message": "User registered successfully", "user_id": str(result.inserted_id)}
+
+# LOGIN USER
+@app.post("/login")
+async def login_user(data: LoginRequest):
+    """
+    Authenticate user with username and password.
+    """
+    user = await users_collection.find_one({
+        "username": data.username,
+        "password": data.password  # In production, compare hashed passwords!
+    })
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    return {
+        "message": f"Login successful for {data.username}",
+        "user_id": str(user["_id"]),
+        "username": user["username"]
+    }
+
+# HABITS endpoints
+@app.get("/habits", response_description="Get user habits")
+async def get_habits(username: str):
+    """
+    Get all habits for a specific user.
+    """
+    try:
+        print(f"Fetching habits for username: {username}")
+        habits = await habits_collection.find({"username": username}).to_list(1000)
+        print(f"Found {len(habits)} habits")
+        
+        # Convert ObjectId to string for JSON serialization
+        for habit in habits:
+            if "_id" in habit:
+                habit["_id"] = str(habit["_id"])
+        
+        return habits
+    except Exception as e:
+        print(f"Error fetching habits: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch habits: {str(e)}")
+
+@app.post(
+    "/habits",
+    response_description="Create new habit",
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_habit(h: HabitCreate):
+    """
+    Create a new habit for a user.
+    """
+    try:
+        # Generate UUID for the habit
+        habit_id = str(uuid.uuid4())
+        
+        new_habit = {
+            "id": habit_id,
+            "username": h.username,
+            "title": h.title,
+            "description": h.description or ""
+        }
+        
+        result = await habits_collection.insert_one(new_habit)
+        new_habit["_id"] = str(result.inserted_id)
+        
+        return {
+            "message": "Habit created successfully",
+            "habit": new_habit
+        }
+    except Exception as e:
+        print(f"Error creating habit: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create habit: {str(e)}")
+
+# AFFIRMATIONS endpoints
+@app.get("/affirmations", response_description="Get all affirmations")
+async def get_affirmations():
+    """
+    Get all affirmations.
+    """
+    affirmations = await affirmations_collection.find().to_list(1000)
+    
+    # Extract just the text for backward compatibility
+    # Or return full objects with IDs
+    result = []
+    for aff in affirmations:
+        result.append({
+            "id": str(aff["_id"]),
+            "text": aff["text"]
+        })
+    
+    return result
+
+@app.post(
+    "/affirmations",
+    response_description="Create new affirmation",
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_affirmation(a: AffirmationCreate):
+    """
+    Create a new affirmation.
+    """
+    try:
+        new_aff = {"text": a.text}
+        result = await affirmations_collection.insert_one(new_aff)
+        new_aff["_id"] = str(result.inserted_id)
+        return {
+            "message": "Affirmation created successfully",
+            "affirmation": new_aff
+        }
+    except Exception as e:
+        print(f"Error creating affirmation: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create affirmation: {str(e)}")
+
+# Delete habit endpoint
+@app.delete("/habits/{habit_id}", response_description="Delete habit")
+async def delete_habit(habit_id: str):
+    """
+    Delete a habit by ID.
+    """
+    delete_result = await habits_collection.delete_one({"id": habit_id})
+    
+    if delete_result.deleted_count == 1:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    
+    raise HTTPException(status_code=404, detail=f"Habit {habit_id} not found")
