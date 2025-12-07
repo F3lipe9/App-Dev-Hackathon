@@ -33,8 +33,16 @@ export default function WaterIntake() {
     if (!isSetup || !username) return;
     const newOz = currentOz + 1;
     setCurrentOz(newOz);
+
     const size = parseInt(bottleOz, 10) || 0;
     const goal = parseInt(dailyGoal, 10) || 0;
+
+    if (newOz >= goal && !hasReachedGoal) {
+    setShowConfetti(true);
+    setHasReachedGoal(true);
+    setTimeout(() => setShowConfetti(false), 3000);
+    }
+    
     await saveWater({ bottleName, bottleOz: size, dailyGoal: goal, currentOz: newOz });
   };
 
@@ -45,6 +53,10 @@ export default function WaterIntake() {
       setCurrentOz(newOz);
       const size = parseInt(bottleOz, 10) || 0;
       const goal = parseInt(dailyGoal, 10) || 0;
+
+      if (newOz < goal) {
+      setHasReachedGoal(false);
+     }
       await saveWater({ bottleName, bottleOz: size, dailyGoal: goal, currentOz: newOz });
     }
   };
