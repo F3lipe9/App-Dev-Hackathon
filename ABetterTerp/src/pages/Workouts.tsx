@@ -2,30 +2,6 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import './home.css'
 
-/**
- * UMD Wellness & Study Hub — Workout Tracker (v1)
- * Last updated: 2025-12-07
- *
- * Improvements:
- * - Cardio section + cardio logging fields
- * - Category filter (All/Strength/Cardio)
- * - Recommendations refined
- * - Custom exercises persisted
- * - Active workout persisted (refresh-safe)
- * - Confirm discard when there's data
- * - ✅ Bodyweight exercises now show recommendations
- * - ✅ Date picker for back-logging workouts
- * - ✅ Bodyweight Strength supports added/assisted load
- * - ✅ Custom exercises can capture body part + equipment + compound
- * - ✅ Edit + delete exercises (defaults + custom) with override persistence
- *
- * Fixes:
- * - "Add" button reliability (functional state updates)
- * - addSet/updateSet/removeSet made refresh/batch safe
- * - loadExercises de-dupe now truly prefers stored/custom
- * - "+5 lbs" message only when reps 8–12 AND the computed increment is 5
- */
-
 const SESSIONS_KEY = 'umd_workouts_v1'
 const EXERCISES_KEY = 'umd_exercises_v1'
 const ACTIVE_KEY = 'umd_active_workout_v1'
@@ -322,14 +298,14 @@ export default function Workouts() {
   const [workoutName, setWorkoutName] = useState('')
   const [workoutDate, setWorkoutDate] = useState<string>(() => todayInputStr())
 
-  // ✅ richer custom exercise fields
+
   const [customName, setCustomName] = useState('')
   const [customCategory, setCustomCategory] = useState<ExerciseCategory>('Strength')
   const [customMuscle, setCustomMuscle] = useState<string>('Other')
   const [customEquipment, setCustomEquipment] = useState<string>('Other')
   const [customCompound, setCustomCompound] = useState<boolean>(false)
 
-  // ✅ edit UI state
+
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editCategory, setEditCategory] = useState<ExerciseCategory>('Strength')
@@ -710,7 +686,7 @@ export default function Workouts() {
                     style={inputStyle}
                   />
 
-                  {/* ✅ Date picker */}
+                  
                   <input
                     type="date"
                     value={workoutDate}
@@ -782,7 +758,7 @@ export default function Workouts() {
                         </div>
                         <div style={{ ...mutedStyle, marginTop: 6 }}>{hint}</div>
 
-                        {/* ✅ Inline editor */}
+                        {/* Inline editor */}
                         {editingId === ex.id && (
                           <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <input
@@ -842,7 +818,7 @@ export default function Workouts() {
                         )}
                       </div>
 
-                      {/* ✅ Action buttons */}
+                      {/* Action buttons */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         <button
                           style={smallPrimaryStyle}
@@ -874,7 +850,7 @@ export default function Workouts() {
                 })}
               </div>
 
-              {/* ✅ Enhanced Custom exercise row */}
+              {/* Enhanced Custom exercise row */}
               <div style={rowWrapAlignStyle}>
                 <input
                   value={customName}
@@ -963,7 +939,7 @@ export default function Workouts() {
                         style={inputStyle}
                       />
 
-                      {/* ✅ Editable active date */}
+                      {/* Editable active date */}
                       <input
                         type="date"
                         value={(active.dateISO || '').slice(0, 10) || workoutDate}
