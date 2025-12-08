@@ -41,6 +41,8 @@ users_collection = db.get_collection("users")
 habits_collection = db.get_collection("habits")
 affirmations_collection = db.get_collection("affirmations")
 water_collection = db.get_collection("water_intake")
+exercises_collection = db.get_collection("exercises")
+
 
 # Type for MongoDB ObjectId
 PyObjectId = Annotated[str, BeforeValidator(str)]
@@ -102,6 +104,31 @@ class WaterIntakeUpsert(BaseModel):
     dailyGoal: int
     currentOz: int | None = 0
 
+class ExerciseModel(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str = Field(...)
+    name: str = Field(..., min_length=1)
+    muscle: str = Field(default="Other")
+    equipment: str = Field(default="Other")
+    compound: bool = Field(default=False)
+    category: str = Field(default="Strength")  # "Strength" | "Cardio"
+    createdByUser: bool = Field(default=True)
+
+class ExerciseCreate(BaseModel):
+    username: str
+    name: str
+    muscle: str = "Other"
+    equipment: str = "Other"
+    compound: bool = False
+    category: str = "Strength"
+
+class ExerciseUpdate(BaseModel):
+    name: Optional[str] = None
+    muscle: Optional[str] = None
+    equipment: Optional[str] = None
+    compound: Optional[bool] = None
+    category: Optional[str] = None
+
 # ---------------------------
 # Helper Functions
 # ---------------------------
@@ -124,6 +151,18 @@ async def initialize_default_affirmations():
         
         for text in defaults:
             await affirmations_collection.insert_one({"text": text})
+async def ensure_default_exercises(username: str):
+    """Seed default exercises for this user if they don't already have any."""
+    count = await exercises_collection.count_documents({"username": username})
+    if count > 0:
+        return
+
+    docs = []
+    for ex in DEFAULT_EXERCISES:
+        docs.append({**ex, "username": username})
+    if docs:
+        await exercises_collection.insert_many(docs)
+
 
 # ---------------------------
 # ROUTES
@@ -338,3 +377,131 @@ async def upsert_water(w: WaterIntakeUpsert):
     except Exception as e:
         print(f"Error saving water intake: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save water intake: {str(e)}")
+    
+# EXERCISES (Defaults)
+# ---------------------------
+DEFAULT_STRENGTH_EXERCISES = [
+    {"id": "bench", "name": "Barbell Bench Press", "muscle": "Chest", "equipment": "Barbell", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "squat", "name": "Back Squat", "muscle": "Legs", "equipment": "Barbell", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "deadlift", "name": "Deadlift", "muscle": "Legs", "equipment": "Barbell", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "ohp", "name": "Overhead Press", "muscle": "Shoulders", "equipment": "Barbell", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "row", "name": "Barbell Row", "muscle": "Back", "equipment": "Barbell", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "pullup", "name": "Pull-Ups", "muscle": "Back", "equipment": "Bodyweight", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "latpull", "name": "Lat Pulldown", "muscle": "Back", "equipment": "Cable", "compound": False, "category": "Strength", "createdByUser": False},
+    {"id": "legpress", "name": "Leg Press", "muscle": "Legs", "equipment": "Machine", "compound": True, "category": "Strength", "createdByUser": False},
+    {"id": "curl", "name": "Dumbbell Curl", "muscle": "Arms", "equipment": "Dumbbell", "compound": False, "category": "Strength", "createdByUser": False},
+    {"id": "tricep", "name": "Triceps Pushdown", "muscle": "Arms", "equipment": "Cable", "compound": False, "category": "Strength", "createdByUser": False},
+    {"id": "lateral", "name": "Lateral Raises", "muscle": "Shoulders", "equipment": "Dumbbell", "compound": False, "category": "Strength", "createdByUser": False},
+]
+
+DEFAULT_CARDIO_EXERCISES = [
+    {"id": "tread", "name": "Treadmill Run", "muscle": "Cardio", "equipment": "Treadmill", "compound": False, "category": "Cardio", "createdByUser": False},
+    {"id": "bike", "name": "Stationary Bike", "muscle": "Cardio", "equipment": "Bike", "compound": False, "category": "Cardio", "createdByUser": False},
+    {"id": "rower", "name": "Rowing Machine", "muscle": "Cardio", "equipment": "Rower", "compound": False, "category": "Cardio", "createdByUser": False},
+    {"id": "elliptical", "name": "Elliptical", "muscle": "Cardio", "equipment": "Elliptical", "compound": False, "category": "Cardio", "createdByUser": False},
+    {"id": "stairs", "name": "Stair Climber", "muscle": "Cardio", "equipment": "Machine", "compound": False, "category": "Cardio", "createdByUser": False},
+    {"id": "jumprope", "name": "Jump Rope", "muscle": "Cardio", "equipment": "Bodyweight", "compound": False, "category": "Cardio", "createdByUser": False},
+]
+
+DEFAULT_EXERCISES = DEFAULT_STRENGTH_EXERCISES + DEFAULT_CARDIO_EXERCISES
+
+# ---------------------------
+# EXERCISES endpoints
+# ---------------------------
+@app.get("/exercises", response_description="Get user exercises")
+async def get_exercises(username: str):
+    """
+    Returns the exercise library for a user.
+    Seeds defaults on first access.
+    """
+    try:
+        await ensure_default_exercises(username)
+
+        exercises = await exercises_collection.find({"username": username}).to_list(2000)
+
+        for ex in exercises:
+            if "_id" in ex:
+                ex["_id"] = str(ex["_id"])
+
+        return exercises
+    except Exception as e:
+        print(f"Error fetching exercises: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch exercises: {str(e)}")
+
+
+@app.post("/exercises", response_description="Create custom exercise", status_code=status.HTTP_201_CREATED)
+async def create_exercise(ex: ExerciseCreate):
+    """
+    Create a custom exercise for a user.
+    """
+    try:
+        new_ex = {
+            "id": str(uuid.uuid4()),
+            "username": ex.username,
+            "name": ex.name,
+            "muscle": ex.muscle or "Other",
+            "equipment": ex.equipment or "Other",
+            "compound": bool(ex.compound) if ex.category == "Strength" else False,
+            "category": ex.category or "Strength",
+            "createdByUser": True,
+        }
+
+        result = await exercises_collection.insert_one(new_ex)
+        new_ex["_id"] = str(result.inserted_id)
+
+        return {"message": "Exercise created", "exercise": new_ex}
+    except Exception as e:
+        print(f"Error creating exercise: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create exercise: {str(e)}")
+
+
+@app.put("/exercises/{exercise_id}", response_description="Update exercise")
+async def update_exercise(exercise_id: str, patch: ExerciseUpdate):
+    """
+    Update an exercise by its 'id' field (not Mongo _id).
+    Works for both defaults and custom exercises.
+    """
+    try:
+        update_doc = {k: v for k, v in patch.model_dump().items() if v is not None}
+
+        if "category" in update_doc and update_doc["category"] == "Cardio":
+            update_doc["compound"] = False
+
+        if not update_doc:
+            raise HTTPException(status_code=400, detail="No fields provided to update")
+
+        updated = await exercises_collection.find_one_and_update(
+            {"id": exercise_id},
+            {"$set": update_doc},
+            return_document=ReturnDocument.AFTER,
+        )
+
+        if not updated:
+            raise HTTPException(status_code=404, detail="Exercise not found")
+
+        updated["_id"] = str(updated.get("_id"))
+        return {"message": "Exercise updated", "exercise": updated}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error updating exercise: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update exercise: {str(e)}")
+
+
+@app.delete("/exercises/{exercise_id}", response_description="Delete exercise")
+async def delete_exercise(exercise_id: str):
+    """
+    Delete an exercise by its 'id' field.
+    """
+    try:
+        delete_result = await exercises_collection.delete_one({"id": exercise_id})
+
+        if delete_result.deleted_count == 1:
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+        raise HTTPException(status_code=404, detail="Exercise not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error deleting exercise: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete exercise: {str(e)}")
