@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import './Home.css'
+import './home.css'
 
 export default function Exams() {
   return (
