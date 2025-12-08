@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import './home.css'
 
 const SESSIONS_KEY = 'umd_workouts_v1'
@@ -134,13 +134,11 @@ function loadExercises(): Exercise[] {
   const stored = safeParse<Exercise[]>(localStorage.getItem(EXERCISES_KEY), [])
   const overrides = loadOverrides()
 
-  // Prefer stored/custom over defaults by ordering defaults first, then stored
   const merged = [...DEFAULT_EXERCISES, ...stored]
 
   const map = new Map<string, Exercise>()
   for (const ex of merged) map.set(ex.id, ex)
 
-  // Apply overrides (edit or delete)
   for (const o of overrides) {
     if (!o?.id) continue
     if (o.deleted) {
@@ -208,16 +206,6 @@ function dateInputToISO(dateStr: string) {
 
 /* ----------------- recommendation logic ----------------- */
 
-/**
- * Rules:
- * - Cardio: simple time/pace guidance
- * - Strength:
- *   - Bodyweight Strength:
- *       * positive weight = added load
- *       * negative weight = assistance
- *       * reps-only also supported
- *   - Only show EXACT "Try +5 lbs..." when inc === 5 and reps 8–12
- */
 function getSuggestion(exercise: Exercise, historySets: WorkoutSet[]) {
   if (isCardio(exercise)) {
     if (!historySets.length) return 'No history yet — start easy and build consistency.'
@@ -298,13 +286,11 @@ export default function Workouts() {
   const [workoutName, setWorkoutName] = useState('')
   const [workoutDate, setWorkoutDate] = useState<string>(() => todayInputStr())
 
-
   const [customName, setCustomName] = useState('')
   const [customCategory, setCustomCategory] = useState<ExerciseCategory>('Strength')
   const [customMuscle, setCustomMuscle] = useState<string>('Other')
   const [customEquipment, setCustomEquipment] = useState<string>('Other')
   const [customCompound, setCustomCompound] = useState<boolean>(false)
-
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -320,9 +306,7 @@ export default function Workouts() {
   useEffect(() => { saveExercises(exercises) }, [exercises])
   useEffect(() => { saveOverrides(overrides) }, [overrides])
 
-  // If overrides change externally, you can re-sync exercises by reloading:
   useEffect(() => {
-    // Keep UI aligned with overrides after edits/deletes
     setExercises(loadExercises())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overrides.length])
@@ -476,7 +460,6 @@ export default function Workouts() {
     setTab('history')
   }
 
-  //  Add button reliability
   function addExerciseToActive(ex: Exercise) {
     setActive(prev => {
       if (!prev) {
@@ -621,7 +604,6 @@ export default function Workouts() {
     const ok = window.confirm(`Delete "${target.name}" from your library?`)
     if (!ok) return
 
-    // remove from active workout if present
     setActive(prev => prev ? { ...prev, items: prev.items.filter(i => i.exerciseId !== id) } : prev)
 
     if (target.createdByUser) {
@@ -643,6 +625,9 @@ export default function Workouts() {
     <div className="home-container home-root">
       <div className="home-card" style={{ maxWidth: 1100 }}>
         <h1 className="home-heading">Workouts</h1>
+
+        {/* Top navigation bar */}
+        <TopNav />
 
         {/* Tabs */}
         <div style={tabsRowStyle}>
@@ -686,7 +671,6 @@ export default function Workouts() {
                     style={inputStyle}
                   />
 
-                  
                   <input
                     type="date"
                     value={workoutDate}
@@ -1150,7 +1134,7 @@ export default function Workouts() {
             <section style={sectionStyle}>
               <div style={sectionHeaderStyle}>
                 <h3 style={sectionTitleStyle}>Past sessions</h3>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <button style={secondaryStyle} onClick={() => startWorkout(true)} type="button">Copy Last</button>
                   <button style={primaryStyle} onClick={() => startWorkout(false)} type="button">Start New</button>
                 </div>
@@ -1167,9 +1151,10 @@ export default function Workouts() {
 
                   return (
                     <div key={ses.id} style={historyCardStyle}>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{ses.name || 'Workout'}</div>
+                      <div style={historyLeftStyle}>
+                        <div style={historyTitleStyle}>{ses.name || 'Workout'}</div>
                         <div style={mutedStyle}>{formatDate(ses.dateISO)}</div>
+
                         <div style={{ ...mutedStyle, marginTop: 4 }}>
                           {(ses.items || []).length} exercises • {totalSets} sets
                         </div>
@@ -1179,8 +1164,11 @@ export default function Workouts() {
                             {(ses.items || []).map(it => {
                               const ex = getExerciseById(it.exerciseId)
                               return (
-                                <div key={it.exerciseId} style={{ ...mutedStyle, marginTop: 4 }}>
-                                  • {ex.name} ({ex.category}) — {it.sets.length} sets
+                                <div key={it.exerciseId} style={historyLineStyle}>
+                                  {ex.name}
+                                  <span style={historyMetaStyle}>({ex.category})</span>
+                                  <span style={historyDashStyle}>—</span>
+                                  {it.sets.length} sets
                                 </div>
                               )
                             })}
@@ -1188,7 +1176,7 @@ export default function Workouts() {
                         )}
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div style={historyActionsStyle}>
                         <button
                           style={secondaryOutlineStyle}
                           onClick={() => setExpandedId(prev => prev === ses.id ? null : ses.id)}
@@ -1211,11 +1199,38 @@ export default function Workouts() {
             </section>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
 
-        {/* Back link */}
-        <p style={{ marginTop: '1.5rem' }}>
-          <Link to="/home">Back</Link>
-        </p>
+/* ----------------- top nav component ----------------- */
+
+function TopNav() {
+  const location = useLocation()
+
+  const links = [
+    { to: '/home', label: 'Home' },
+    { to: '/assignments', label: 'Assignments' },
+    { to: '/exams', label: 'Exams' },
+    { to: '/water-intake', label: 'Water Intake' },
+  ]
+
+  return (
+    <div style={topNavContainerStyle}>
+      <div style={topNavInnerStyle}>
+        {links.map(link => {
+          const isActive = location.pathname === link.to
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              style={isActive ? topNavLinkActiveStyle : topNavLinkStyle}
+            >
+              {link.label}
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
@@ -1297,6 +1312,7 @@ const exerciseCardStyle: CSSProperties = {
   background: '#F8F9FA'
 }
 
+/* ✅ UPDATED history card base */
 const historyCardStyle: CSSProperties = {
   border: '1px solid #E0E0E0',
   borderRadius: 12,
@@ -1304,7 +1320,9 @@ const historyCardStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
-  background: '#F8F9FA'
+  gap: '1rem',
+  background: '#F8F9FA',
+  textAlign: 'left'
 }
 
 const mutedStyle: CSSProperties = {
@@ -1423,4 +1441,78 @@ const tdStyle: CSSProperties = {
   padding: '0.5rem 0.4rem',
   borderBottom: '1px solid #EEE',
   fontSize: '0.9rem'
+}
+
+/* ---------- history detail layout styles (NEW) ---------- */
+
+const historyLeftStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2,
+  textAlign: 'left',
+  minWidth: 0
+}
+
+const historyTitleStyle: CSSProperties = {
+  fontWeight: 700,
+  fontSize: '1.05rem'
+}
+
+const historyLineStyle: CSSProperties = {
+  ...mutedStyle,
+  marginTop: 4,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  flexWrap: 'wrap'
+}
+
+const historyMetaStyle: CSSProperties = {
+  opacity: 0.85
+}
+
+const historyDashStyle: CSSProperties = {
+  opacity: 0.6
+}
+
+const historyActionsStyle: CSSProperties = {
+  display: 'flex',
+  gap: '0.5rem',
+  alignItems: 'flex-start',
+  flexShrink: 0
+}
+
+/* ---------- top nav styles ---------- */
+
+const topNavContainerStyle: CSSProperties = {
+  marginTop: '0.75rem',
+  marginBottom: '1rem',
+  padding: '0.6rem',
+  borderRadius: 12,
+  border: '1px solid #E0E0E0',
+  background: '#FFFFFF',
+}
+
+const topNavInnerStyle: CSSProperties = {
+  display: 'flex',
+  gap: '0.5rem',
+  flexWrap: 'wrap',
+}
+
+const topNavLinkStyle: CSSProperties = {
+  textDecoration: 'none',
+  padding: '0.35rem 0.7rem',
+  borderRadius: 999,
+  border: '1px solid #E0E0E0',
+  background: '#F8F9FA',
+  color: '#111',
+  fontSize: '0.85rem',
+  fontWeight: 500,
+}
+
+const topNavLinkActiveStyle: CSSProperties = {
+  ...topNavLinkStyle,
+  background: '#E21833',
+  borderColor: '#E21833',
+  color: 'white',
 }
