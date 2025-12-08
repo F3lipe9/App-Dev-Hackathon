@@ -1213,7 +1213,7 @@ function TopNav() {
     { to: '/home', label: 'Home' },
     { to: '/assignments', label: 'Assignments' },
     { to: '/exams', label: 'Exams' },
-    { to: '/water-intake', label: 'Water Intake' },
+    { to: '/water', label: 'Water Intake' },
   ]
 
   return (
