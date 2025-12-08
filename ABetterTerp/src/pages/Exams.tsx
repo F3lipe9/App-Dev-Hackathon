@@ -3,7 +3,8 @@ import { Link } from 'react-router'
 import './Home.css'
 
 type Exam = {
-  id: number
+  id: string
+  username: string
   course: string
   date: string
   plannedHours: number
@@ -17,25 +18,47 @@ export default function Exams() {
   const [date, setDate] = useState('')
   const [plannedHours, setPlannedHours] = useState('')
 
-  function handleAddExam(e: React.FormEvent) {
+  async function handleAddExam(e: React.FormEvent) {
     e.preventDefault()
 
-    const newExam: Exam = {
-      id: Date.now(),
+    const username = 'testuser'
+
+    const body = {
+      username,
       course,
       date,
-      plannedHours: Number(plannedHours) || 0,
+      planned_hours: Number(plannedHours) || 0,
+    }
+
+    const res = await fetch('http://localhost:8000/exams', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+
+    if (!res.ok) {
+      console.error('Failed to save exam')
+      return
+    }
+
+    const data = await res.json() // { id: "mongoId" }
+
+    const newExam: Exam = {
+      id: data.id,
+      username,
+      course,
+      date,
+      plannedHours: body.planned_hours,
       done: false,
     }
 
     setExams(prev => [...prev, newExam])
-
     setCourse('')
     setDate('')
     setPlannedHours('')
   }
 
-  function handleScoreChange(id: number, value: string) {
+  function handleScoreChange(id: string, value: string) {
     const score = value === '' ? undefined : Number(value)
     setExams(prev =>
       prev.map(exam =>
@@ -44,7 +67,7 @@ export default function Exams() {
     )
   }
 
-  function toggleDone(id: number) {
+  function toggleDone(id: string) {
     setExams(prev =>
       prev.map(exam =>
         exam.id === id ? { ...exam, done: !exam.done } : exam
@@ -77,7 +100,6 @@ export default function Exams() {
       <div className="home-card">
         <h1 className="home-heading">Exams</h1>
 
-        {/* Add exam form */}
         <section style={{ marginTop: '1rem' }}>
           <h2>Track Your Exams</h2>
           <form
@@ -86,7 +108,7 @@ export default function Exams() {
               display: 'grid',
               gap: '0.75rem',
               maxWidth: 450,
-              margin: '0.75rem auto', 
+              margin: '0.75rem auto',
               textAlign: 'center',
             }}
           >
@@ -129,7 +151,6 @@ export default function Exams() {
           </form>
         </section>
 
-        {/* Exam cards */}
         <section style={{ marginTop: '1.5rem' }}>
           <h2>Upcoming & Past Exams</h2>
           {exams.length === 0 ? (
@@ -224,7 +245,6 @@ export default function Exams() {
           )}
         </section>
 
-        {/* Average + letter grade */}
         <section style={{ marginTop: '1.5rem' }}>
           <h2>Overall Performance</h2>
           {scoredExams.length === 0 ? (

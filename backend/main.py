@@ -4,11 +4,24 @@ import csv
 from typing import List, Optional
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
-
+from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
 
 # CREATE A VIRTUAL ENVIRONMENT AND INSTALL THE REQUIRED FASTAPI PACKAGES
+load_dotenv()
+MONGODB_URI = os.getenv("MONGODB_URI")
 
 app = FastAPI()
+
+@app.on_event("startup")
+def startup_db_client():
+    app.mongodb_client = MongoClient(MONGODB_URI)
+    app.database = app.mongodb_client.get_database()  # 'abetterterp' from URI
+
+@app.on_event("shutdown")
+def shutdown_db_client():
+    app.mongodb_client.close()
 
 origins = [
     "http://localhost:5173",
@@ -23,6 +36,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/db-test")
+def db_test():
+    exams = app.database["exams"]
+    count = exams.count_documents({})
+    return {"ok": True, "exam_count": count}
+
 # ---------------------------
 # CSV "Database" Setup
 # ---------------------------
@@ -84,6 +104,12 @@ class HabitCreate(BaseModel):
     title: str
     description: Optional[str] = ""
 
+class ExamCreate(BaseModel):
+    username: str
+    course: str
+    date: str
+    planned_hours: int
+
 # ---------------------------
 # Helper Functions
 # ---------------------------
@@ -142,7 +168,11 @@ def create_habit(h: HabitCreate):
     append_csv(HABITS_CSV, row)
     return {"message": "Habit created", "habit": row}
 
-
+@app.post("/exams")
+def create_exam(exam: ExamCreate):
+    exams_collection = app.database["exams"]
+    result = exams_collection.insert_one(exam.dict())
+    return {"id": str(result.inserted_id)}
 
 # AFFIRMATIONS endpoints
 @app.get("/affirmations")
