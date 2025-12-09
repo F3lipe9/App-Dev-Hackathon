@@ -1,5 +1,69 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import './WaterIntake.css';
+
+const TopNav = () => {
+  const location = useLocation();
+  const links = [
+    { to: '/home', label: 'Home' },
+    { to: '/assignments', label: 'Assignments' },
+    { to: '/exams', label: 'Exams' },
+    { to: '/water', label: 'Water Intake' },
+  ];
+  return (
+    <div style={topNavContainerStyle}>
+      <div style={topNavInnerStyle}>
+        {links.map(link => {
+          const isActive = location.pathname === link.to;
+          return (
+            <a
+              key={link.to}
+              href={link.to}
+              style={isActive ? topNavLinkActiveStyle : topNavLinkStyle}
+            >
+              {link.label}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const topNavContainerStyle: React.CSSProperties = {
+  marginTop: '0.75rem',
+  marginBottom: '1rem',
+  padding: '0.6rem',
+  borderRadius: 12,
+  border: '1px solid #E0E0E0',
+  background: '#FFFFFF',
+};
+
+const topNavInnerStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '0.5rem',
+  flexWrap: 'wrap',
+};
+
+const topNavLinkStyle: React.CSSProperties = {
+  textDecoration: 'none',
+  padding: '0.35rem 0.7rem',
+  borderRadius: 999,
+  border: '1px solid #E0E0E0',
+  background: '#F8F9FA',
+  color: '#111',
+  fontSize: '0.85rem',
+  fontWeight: 500,
+  display: 'inline-block',
+  cursor: 'pointer',
+};
+
+const topNavLinkActiveStyle: React.CSSProperties = {
+  ...topNavLinkStyle,
+  background: '#E21833',
+  borderColor: '#E21833',
+  color: 'white',
+};
 
 interface HistoryEntry {
   date: string;
@@ -124,8 +188,9 @@ export default function WaterIntake() {
 
   if (!isSetup) {
     return (
-      <div className="water-intake-page">
-        <div className="setup-card">
+      <div className="water-intake-page" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <TopNav />
+        <div style={{ flex: 1 }}>
           <h1 className="setup-title">
             <span className="title-icon">💧</span>
             Water Intake Setup
@@ -173,10 +238,11 @@ export default function WaterIntake() {
   }
 
   return (
-    <div className="water-intake-page">
-      {showConfetti && <Confetti />}
-
-      <div className="tracker-container">
+    <div className="water-intake-page" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <TopNav />
+      <div style={{ flex: 1 }}>
+        {showConfetti && <Confetti />}
+        <div className="tracker-container">
         <div className="tracker-card">
           <div className="tracker-header">
             <h1 className="tracker-title">{bottleName}</h1>
@@ -245,6 +311,7 @@ export default function WaterIntake() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

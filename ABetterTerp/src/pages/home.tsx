@@ -182,7 +182,7 @@ export default function Home() {
                             <p>A Smart Terp stays on top of their classes</p>
                             <div className="button-row">
                                 <Link to="/assignments"><button className="btn btn-primary">Assignments</button></Link>
-                                <Link to="/exams"><button className="btn btn-secondary">Exams</button></Link>
+                                <Link to="/exams"><button className="btn btn-primary">Exams</button></Link>
                             </div>
                         </div>
 
@@ -191,7 +191,7 @@ export default function Home() {
                             <p>A Healthy Terp can balance class with their body wellness</p>
                             <div className="button-row">
                                 <Link to="/workouts"><button className="btn btn-primary">Workouts</button></Link>
-                                <Link to="/water"><button className="btn btn-secondary">Water Intake</button></Link>
+                                <Link to="/water"><button className="btn btn-primary">Water Intake</button></Link>
                             </div>
                         </div>
                     </div>

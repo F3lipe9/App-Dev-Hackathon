@@ -1,35 +1,31 @@
-body, .water-intake-page {
-  font-family: "Segoe UI", system-ui, sans-serif;
-}
-
-h1, h2 {
-  font-weight: bold;
-}
-
 .water-intake-page {
   min-height: 100vh;
-  background-color: #FFFFFF;
-  padding: 20px;
+  background: linear-gradient(135deg, rgb(226, 24, 51) 0%, rgb(0, 0, 0) 100%);
+  padding: 2rem;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .setup-card {
-  background-color: #F8F9FA;
-  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgb(255, 255, 255);
   border-radius: 12px;
-  max-width: 500px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   width: 100%;
 }
 
 .setup-title {
-  color: #000000;
-  margin-bottom: 30px;
-  font-size: 28px;
+  margin: 0 0 2rem 0;
+  font-size: 2.5rem;
+  color: rgb(0, 0, 0);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.5rem;
+  border-bottom: 3px solid rgb(226, 24, 51);
+  padding-bottom: 1rem;
 }
 
 .title-icon {
@@ -37,23 +33,24 @@ h1, h2 {
 }
 
 .input-group {
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .input-label {
-  color: #000000;
+  color: rgb(0, 0, 0);
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .input-field {
   width: 100%;
-  padding: 12px;
-  background-color: #FFFFFF;
-  border: 2px solid #D1D5DB;
+  padding: 0.5rem;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid rgb(209, 213, 219);
   border-radius: 6px;
-  color: #000000;
-  font-size: 16px;
+  color: rgb(0, 0, 0);
+  font-size: 0.95rem;
   box-sizing: border-box;
 }
 
@@ -63,15 +60,16 @@ h1, h2 {
 
 .setup-button {
   width: 100%;
-  padding: 14px;
-  background-color: #E21833;
-  color: #FFFFFF;
+  padding: 0.75rem;
+  background: rgb(226, 24, 51);
+  color: rgb(255, 255, 255);
   border: none;
   border-radius: 6px;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(226, 24, 51, 0.3);
 }
 
 .setup-button:hover {
@@ -81,17 +79,19 @@ h1, h2 {
 .tracker-container {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
 }
 
 .tracker-card {
-  background-color: #F8F9FA;
-  padding: 40px;
+  background-color: rgb(255, 255, 255);
+  padding: 2rem;
   border-radius: 12px;
   flex: 1;
   min-width: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .tracker-header {
@@ -196,41 +196,39 @@ h1, h2 {
 
 .controls {
   display: flex;
-  gap: 15px;
+  gap: 1rem;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .control-button {
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 0.95rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+  border: none;
 }
 
 .back-button {
-  background-color: #F8F9FA;
-  border: 2px solid #D1D5DB;
-  color: #000000;
-}
-
-.back-button {
-  background-color: #E5E7EB;
-  opacity: 0.5;
+  background-color: rgb(255, 255, 255);
+  border: 2px solid rgb(209, 213, 219);
+  color: rgb(0, 0, 0);
 }
 
 .back-button:hover {
-  border-color: #9CA3AF;
+  background-color: rgb(249, 250, 251);
 }
 
 .add-button {
-  background-color: #E21833;
+  background-color: rgb(226, 24, 51);
   border: none;
-  color: #FFFFFF;
+  color: rgb(255, 255, 255);
+  box-shadow: 0 2px 4px rgba(226, 24, 51, 0.3);
 }
 
 .add-button:hover {
@@ -238,53 +236,58 @@ h1, h2 {
 }
 
 .history-panel {
-  background-color: #F8F9FA;
-  padding: 30px;
+  background-color: rgb(255, 255, 255);
+  padding: 2rem;
   border-radius: 12px;
   width: 280px;
   min-width: 280px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .history-title {
-  color: #000000;
-  font-size: 22px;
-  margin-bottom: 20px;
+  color: rgb(0, 0, 0);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid rgb(226, 24, 51);
+  padding-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .history-empty {
-  color: #6B7280;
-  font-size: 14px;
+  color: rgb(107, 114, 128);
+  font-size: 0.875rem;
 }
 
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .history-item {
-  background-color: #FFFFFF;
-  padding: 15px;
+  background-color: rgb(249, 250, 251);
+  padding: 1rem;
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #E5E7EB;
+  border: 1px solid rgb(229, 231, 235);
 }
 
 .history-date {
-  color: #000000;
-  font-size: 14px;
+  color: rgb(0, 0, 0);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .history-percent {
-  color: #E21833;
-  font-size: 18px;
-  font-weight: bold;
+  color: rgb(226, 24, 51);
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .history-percent.goal-reached {
-  color: #FFD200;
+  color: rgb(255, 210, 0);
 }
 
 /* responsive */

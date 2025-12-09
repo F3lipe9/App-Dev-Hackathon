@@ -1,0 +1,299 @@
+.assignments-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgb(226, 24, 51) 0%, rgb(0, 0, 0) 100%);
+  padding: 2rem;
+}
+
+.assignments-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgb(255, 255, 255);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.assignments-header {
+  margin-bottom: 2rem;
+  border-bottom: 3px solid rgb(226, 24, 51);
+  padding-bottom: 1rem;
+}
+
+.assignments-title {
+  margin: 0;
+  font-size: 2.5rem;
+  color: rgb(0, 0, 0);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.assignments-subtitle {
+  margin: 0.5rem 0 0 0;
+  color: rgb(107, 114, 128);
+}
+
+.assignments-points {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: rgb(226, 24, 51);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.controls-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: 2px solid rgb(226, 24, 51);
+  border-radius: 6px;
+  background: rgb(255, 255, 255);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.add-button {
+  padding: 0.5rem 1.5rem;
+  background: rgb(226, 24, 51);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(226, 24, 51, 0.3);
+}
+
+.form-container {
+  background: rgb(249, 250, 251);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 2px solid rgb(226, 24, 51);
+}
+
+.form-title {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: rgb(0, 0, 0);
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-input {
+  padding: 0.5rem;
+  border: 1px solid rgb(209, 213, 219);
+  border-radius: 6px;
+}
+
+.form-select {
+  padding: 0.5rem;
+  border: 1px solid rgb(209, 213, 219);
+  border-radius: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.submit-button {
+  padding: 0.75rem;
+  background: rgb(16, 185, 129);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: rgb(107, 114, 128);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.assignment-card {
+  border: 2px solid rgb(229, 231, 235);
+  border-radius: 8px;
+  padding: 1.25rem;
+  background: rgb(255, 255, 255);
+  border-left-width: 5px;
+  border-left-style: solid;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.assignment-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card-content {
+  flex: 1;
+  min-width: 200px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.type-icon {
+  font-size: 1.5rem;
+}
+
+.assignment-title {
+  margin: 0;
+  font-size: 1.125rem;
+  color: rgb(0, 0, 0);
+}
+
+.course-info {
+  font-size: 0.875rem;
+  color: rgb(226, 24, 51);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.professor {
+  font-size: 0.75rem;
+  color: rgb(107, 114, 128);
+  margin-bottom: 0.5rem;
+}
+
+.card-details {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.due-date {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.priority-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+}
+
+.points {
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+  font-weight: 600;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-select {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  color: rgb(255, 255, 255);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delete-button {
+  padding: 0.5rem 0.75rem;
+  background: rgb(239, 68, 68);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.assignments-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 2px solid rgb(229, 231, 235);
+  text-align: center;
+  color: rgb(107, 114, 128);
+  font-size: 0.875rem;
+}
+
+.loading-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgb(226, 24, 51) 0%, rgb(0, 0, 0) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content {
+  text-align: center;
+  color: rgb(255, 255, 255);
+}
+
+.loading-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  font-size: 1.5rem;
+}

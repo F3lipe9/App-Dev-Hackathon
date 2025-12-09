@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link } from 'react-router'
-import './Home.css'
+import { useEffect, useState, type FormEvent, type CSSProperties } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import './Exams.css'
 
 type Exam = {
   id: string
@@ -18,10 +18,50 @@ export default function Exams() {
   const [date, setDate] = useState('')
   const [plannedHours, setPlannedHours] = useState('')
 
-  async function handleAddExam(e: React.FormEvent) {
+  // from login; set these in your login component after /login succeeds
+  const username = localStorage.getItem('username') ?? ''
+
+  // Load exams for this user on mount / when username changes
+  useEffect(() => {
+    if (!username) return
+
+    async function loadExams() {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/exams?username=${encodeURIComponent(username)}`
+        )
+        if (!res.ok) {
+          console.error('Failed to fetch exams')
+          return
+        }
+
+        const data = await res.json()
+        const mapped: Exam[] = data.map((ex: any) => ({
+          id: ex._id,            // use Mongo _id as client id
+          username: ex.username,
+          course: ex.course,
+          date: ex.date,
+          plannedHours: ex.planned_hours,
+          score: ex.score,
+          done: ex.done,
+        }))
+
+        setExams(mapped)
+      } catch (err) {
+        console.error('Error loading exams', err)
+      }
+    }
+
+    loadExams()
+  }, [username])
+
+  async function handleAddExam(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const username = 'testuser'
+    if (!username) {
+      console.error('No logged-in user')
+      return
+    }
 
     const body = {
       username,
@@ -58,21 +98,52 @@ export default function Exams() {
     setPlannedHours('')
   }
 
-  function handleScoreChange(id: string, value: string) {
+  async function handleScoreChange(id: string, value: string) {
     const score = value === '' ? undefined : Number(value)
+
+    // optimistic UI update
     setExams(prev =>
       prev.map(exam =>
         exam.id === id ? { ...exam, score } : exam
       )
     )
+
+    // optional: persist to backend if PUT endpoint is enabled
+    try {
+      await fetch(`http://localhost:8000/exams/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score }),
+      })
+    } catch (err) {
+      console.error('Failed to update score', err)
+    }
   }
 
-  function toggleDone(id: string) {
+  async function toggleDone(id: string) {
+    let newDone = false
+
     setExams(prev =>
-      prev.map(exam =>
-        exam.id === id ? { ...exam, done: !exam.done } : exam
-      )
+      prev.map(exam => {
+        if (exam.id === id) {
+          const updated = { ...exam, done: !exam.done }
+          newDone = updated.done ?? false
+          return updated
+        }
+        return exam
+      })
     )
+
+    // optional: persist to backend if PUT endpoint is enabled
+    try {
+      await fetch(`http://localhost:8000/exams/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ done: newDone }),
+      })
+    } catch (err) {
+      console.error('Failed to update done flag', err)
+    }
   }
 
   const scoredExams = exams.filter(e => typeof e.score === 'number')
@@ -96,7 +167,8 @@ export default function Exams() {
     scoredExams.length === 0 ? '-' : letterGradeFromScore(averageScore)
 
   return (
-    <div className="home-container home-root">
+    <div className="home-container home-root" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <TopNav />
       <div className="home-card">
         <h1 className="home-heading">Exams</h1>
 
@@ -251,16 +323,78 @@ export default function Exams() {
             <p style={{ marginTop: '0.5rem' }}>No scores entered yet.</p>
           ) : (
             <p style={{ marginTop: '0.5rem', fontSize: '1rem' }}>
-              Average score: <strong>{averageScore.toFixed(1)}%</strong> — Letter grade:{' '}
+              Average score: <strong>{averageScore.toFixed(1)}%</strong> — Letter grade{' '}
               <strong>{letterGrade}</strong>
             </p>
           )}
         </section>
 
-        <p style={{ marginTop: '1.5rem' }}>
-          <Link to="/home">Back</Link>
-        </p>
       </div>
     </div>
   )
+}
+
+function TopNav() {
+  const location = useLocation()
+
+  const links = [
+    { to: '/home', label: 'Home' },
+    { to: '/assignments', label: 'Assignments' },
+    { to: '/exams', label: 'Exams' },
+    { to: '/water', label: 'Water Intake' },
+  ]
+
+  return (
+    <div style={topNavContainerStyle}>
+      <div style={topNavInnerStyle}>
+        {links.map(link => {
+          const isActive = location.pathname === link.to
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              style={isActive ? topNavLinkActiveStyle : topNavLinkStyle}
+            >
+              {link.label}
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* ---------- top nav styles ---------- */
+
+const topNavContainerStyle: CSSProperties = {
+  marginTop: '0.75rem',
+  marginBottom: '1rem',
+  padding: '0.6rem',
+  borderRadius: 12,
+  border: '1px solid #E0E0E0',
+  background: '#FFFFFF',
+}
+
+const topNavInnerStyle: CSSProperties = {
+  display: 'flex',
+  gap: '0.5rem',
+  flexWrap: 'wrap',
+}
+
+const topNavLinkStyle: CSSProperties = {
+  textDecoration: 'none',
+  padding: '0.35rem 0.7rem',
+  borderRadius: 999,
+  border: '1px solid #E0E0E0',
+  background: '#F8F9FA',
+  color: '#111',
+  fontSize: '0.85rem',
+  fontWeight: 500,
+}
+
+const topNavLinkActiveStyle: CSSProperties = {
+  ...topNavLinkStyle,
+  background: '#E21833',
+  borderColor: '#E21833',
+  color: 'white',
 }
