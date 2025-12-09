@@ -42,6 +42,7 @@ habits_collection = db.get_collection("habits")
 affirmations_collection = db.get_collection("affirmations")
 water_collection = db.get_collection("water_intake")
 exercises_collection = db.get_collection("exercises")
+exams_collection = db.get_collection("exams")
 
 
 # Type for MongoDB ObjectId
@@ -128,6 +129,12 @@ class ExerciseUpdate(BaseModel):
     equipment: Optional[str] = None
     compound: Optional[bool] = None
     category: Optional[str] = None
+
+class ExamCreate(BaseModel):
+    username: str
+    course: str
+    date: str
+    planned_hours: int
 
 # ---------------------------
 # Helper Functions
@@ -505,3 +512,32 @@ async def delete_exercise(exercise_id: str):
     except Exception as e:
         print(f"Error deleting exercise: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to delete exercise: {str(e)}")
+    
+
+@app.post("/exams", response_description="Create exam", status_code=status.HTTP_201_CREATED)
+async def create_exam(exam: ExamCreate):
+    """
+    Create an exam document in MongoDB.
+    """
+    try:
+        doc = exam.model_dump()
+        result = await exams_collection.insert_one(doc)
+        return {"id": str(result.inserted_id), "message": "Exam created"}
+    except Exception as e:
+        print(f"Error creating exam: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create exam: {str(e)}")
+
+
+@app.get("/exams", response_description="Get exams for user")
+async def get_exams(username: str):
+    """
+    Get all exams for a specific user.
+    """
+    try:
+        exams = await exams_collection.find({"username": username}).to_list(1000)
+        for ex in exams:
+            ex["_id"] = str(ex["_id"])
+        return exams
+    except Exception as e:
+        print(f"Error fetching exams: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch exams: {str(e)}")
