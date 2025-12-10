@@ -7,22 +7,18 @@
 .assignments-content {
   max-width: 1200px;
   margin: 0 auto;
-  background: rgb(255, 255, 255);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .assignments-header {
   margin-bottom: 2rem;
-  border-bottom: 3px solid rgb(226, 24, 51);
+  border-bottom: 3px solid rgb(255, 255, 255);
   padding-bottom: 1rem;
 }
 
 .assignments-title {
   margin: 0;
   font-size: 2.5rem;
-  color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -30,7 +26,7 @@
 
 .assignments-subtitle {
   margin: 0.5rem 0 0 0;
-  color: rgb(107, 114, 128);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .assignments-points {
@@ -52,16 +48,20 @@
   text-align: center;
   border-width: 2px;
   border-style: solid;
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgb(226, 24, 51);
 }
 
 .stat-value {
   font-size: 2rem;
   font-weight: bold;
+  color: rgb(226, 24, 51);
 }
 
 .stat-label {
   font-size: 0.875rem;
   font-weight: 500;
+  color: rgb(0, 0, 0);
 }
 
 .controls-container {
@@ -93,7 +93,7 @@
 }
 
 .form-container {
-  background: rgb(249, 250, 251);
+  background: rgba(255, 255, 255, 0.95);
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -160,7 +160,7 @@
   border: 2px solid rgb(229, 231, 235);
   border-radius: 8px;
   padding: 1.25rem;
-  background: rgb(255, 255, 255);
+  background: rgba(255, 255, 255, 0.95);
   border-left-width: 5px;
   border-left-style: solid;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

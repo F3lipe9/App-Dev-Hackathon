@@ -10,21 +10,17 @@
 .setup-card {
   max-width: 1200px;
   margin: 0 auto;
-  background: rgb(255, 255, 255);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   width: 100%;
 }
 
 .setup-title {
   margin: 0 0 2rem 0;
   font-size: 2.5rem;
-  color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 3px solid rgb(226, 24, 51);
+  border-bottom: 3px solid rgb(255, 255, 255);
   padding-bottom: 1rem;
 }
 
@@ -37,7 +33,7 @@
 }
 
 .input-label {
-  color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
@@ -46,7 +42,7 @@
 .input-field {
   width: 100%;
   padding: 0.5rem;
-  background-color: rgb(255, 255, 255);
+  background-color: rgba(255, 255, 255, 0.95);
   border: 1px solid rgb(209, 213, 219);
   border-radius: 6px;
   color: rgb(0, 0, 0);
@@ -86,12 +82,9 @@
 }
 
 .tracker-card {
-  background-color: rgb(255, 255, 255);
   padding: 2rem;
-  border-radius: 12px;
   flex: 1;
   min-width: 300px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .tracker-header {
@@ -102,9 +95,10 @@
 }
 
 .tracker-title {
-  color: #000000;
-  font-size: 28px;
+  color: rgb(255, 255, 255);
+  font-size: 1.75rem;
   margin: 0;
+  font-weight: 600;
 }
 
 .settings-button {
@@ -129,15 +123,15 @@
 }
 
 .current-oz {
-  font-size: 48px;
+  font-size: 3rem;
   font-weight: bold;
-  color: #000000;
+  color: rgb(255, 255, 255);
 }
 
 .goal-text {
-  font-size: 18px;
-  color: #6B7280;
-  margin-top: 5px;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.5rem;
 }
 
 .bottle-container {
@@ -236,12 +230,11 @@
 }
 
 .history-panel {
-  background-color: rgb(255, 255, 255);
   padding: 2rem;
-  border-radius: 12px;
   width: 280px;
   min-width: 280px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
 }
 
 .history-title {

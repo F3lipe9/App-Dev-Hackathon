@@ -14,10 +14,7 @@
 .home-card {
   max-width: 1200px;
   width: 100%;
-  background: rgb(255, 255, 255);
-  border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .home-heading {
@@ -30,7 +27,7 @@
 
 /* Form Styles */
 .form-container {
-  background: rgb(249, 250, 251);
+  background: rgba(255, 255, 255, 0.95);
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -141,7 +138,7 @@
   border: 2px solid rgb(229, 231, 235);
   border-radius: 8px;
   padding: 1.25rem;
-  background: rgb(255, 255, 255);
+  background: rgba(255, 255, 255, 0.95);
   border-left-width: 5px;
   border-left-style: solid;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Link } from 'react-router'
 import "./Register.css"; // reuse your existing styling
+import testudo from '../assets/testudo.jpg'
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -9,6 +10,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
+  // Generate random testudo positions
+  const testudoImages = [
+    { top: '10%', left: '5%', width: '120px', opacity: 0.7 },
+    { top: '15%', right: '8%', width: '100px', opacity: 0.6 },
+    { bottom: '20%', left: '10%', width: '110px', opacity: 0.65 },
+    { bottom: '15%', right: '5%', width: '130px', opacity: 0.75 },
+  ];
 
 
 
@@ -51,7 +60,26 @@ export default function Login() {
 
   return (
     <div className="form-container root">
-      <div className="auth-card">
+      {testudoImages.map((img, idx) => (
+        <img
+          key={idx}
+          src={testudo}
+          alt="Testudo"
+          style={{
+            position: 'absolute',
+            top: img.top,
+            bottom: img.bottom,
+            left: img.left,
+            right: img.right,
+            width: img.width,
+            height: 'auto',
+            opacity: img.opacity,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+      ))}
+      <div className="auth-card" style={{ position: 'relative', zIndex: 10 }}>
         <h1 className="auth-heading">Login</h1>
         <form onSubmit={handleLogin} className="auth-form">
           <input
