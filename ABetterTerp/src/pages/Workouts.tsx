@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import './home.css'
+import './Workouts.css'
+import TopNav from '../components/TopNav'
 
 const SESSIONS_KEY = 'umd_workouts_v1'
 const EXERCISES_KEY = 'umd_exercises_v1'
@@ -623,33 +625,30 @@ export default function Workouts() {
 
   return (
     <div className="home-container home-root">
-      <div className="home-card" style={{ maxWidth: 1100 }}>
+      <div className="home-card workouts-maxwidth">
         <h1 className="home-heading">Workouts</h1>
 
         {/* Top navigation bar */}
         <TopNav />
 
         {/* Tabs */}
-        <div style={tabsRowStyle}>
+        <div className="tabs-row">
           <button
-            className="home-button"
-            style={tab === 'library' ? activeTabStyle : tabStyle}
+            className={`home-button tab${tab === 'library' ? ' active' : ''}`}
             onClick={() => setTab('library')}
             type="button"
           >
             Exercise Library
           </button>
           <button
-            className="home-button"
-            style={tab === 'active' ? activeTabStyle : tabStyle}
+            className={`home-button tab${tab === 'active' ? ' active' : ''}`}
             onClick={() => setTab('active')}
             type="button"
           >
             Active Workout
           </button>
           <button
-            className="home-button"
-            style={tab === 'history' ? activeTabStyle : tabStyle}
+            className={`home-button tab${tab === 'history' ? ' active' : ''}`}
             onClick={() => setTab('history')}
             type="button"
           >
@@ -659,58 +658,58 @@ export default function Workouts() {
 
         {/* LIBRARY */}
         {tab === 'library' && (
-          <div style={{ marginTop: '1.5rem' }}>
-            <section style={sectionStyle}>
-              <div style={sectionHeaderStyle}>
-                <h3 style={sectionTitleStyle}>Start a session</h3>
-                <div style={rowWrapStyle}>
+          <div className="workouts-mt-1-5">
+            <section className="section">
+              <div className="section-header">
+                <h3 className="section-title">Start a session</h3>
+                <div className="row-wrap">
                   <input
                     value={workoutName}
                     onChange={(e) => setWorkoutName(e.target.value)}
                     placeholder="Workout name"
-                    style={inputStyle}
+                    className="input"
                   />
 
                   <input
                     type="date"
                     value={workoutDate}
                     onChange={(e) => setWorkoutDate(e.target.value)}
-                    style={dateInputStyle}
+                    className="input date"
                   />
 
-                  <button style={primaryStyle} onClick={() => startWorkout(false)} type="button">
+                  <button className="btn-primary" onClick={() => startWorkout(false)} type="button">
                     Start Workout
                   </button>
-                  <button style={secondaryStyle} onClick={() => startWorkout(true)} type="button">
+                  <button className="btn-secondary" onClick={() => startWorkout(true)} type="button">
                     Copy Last
                   </button>
                 </div>
               </div>
             </section>
 
-            <section style={sectionStyle}>
-              <div style={sectionHeaderStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <h3 style={sectionTitleStyle}>Exercise library</h3>
+            <section className="section">
+              <div className="section-header">
+                <div className="row-wrap-align">
+                  <h3 className="section-title">Exercise library</h3>
 
                   {/* Category filter */}
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  <div className="row-wrap workouts-gap-0-4">
                     <button
-                      style={libraryFilter === 'all' ? filterActiveStyle : filterStyle}
+                      className={`filter${libraryFilter === 'all' ? ' active' : ''}`}
                       onClick={() => setLibraryFilter('all')}
                       type="button"
                     >
                       All
                     </button>
                     <button
-                      style={libraryFilter === 'strength' ? filterActiveStyle : filterStyle}
+                      className={`filter${libraryFilter === 'strength' ? ' active' : ''}`}
                       onClick={() => setLibraryFilter('strength')}
                       type="button"
                     >
                       Strength
                     </button>
                     <button
-                      style={libraryFilter === 'cardio' ? filterActiveStyle : filterStyle}
+                      className={`filter${libraryFilter === 'cardio' ? ' active' : ''}`}
                       onClick={() => setLibraryFilter('cardio')}
                       type="button"
                     >
@@ -723,39 +722,39 @@ export default function Workouts() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search exercises..."
-                  style={inputStyle}
+                  className="input"
                 />
               </div>
 
-              <div style={gridStyle}>
+              <div className="grid">
                 {filteredExercises.map(ex => {
                   const historySets = historySetsByExercise.get(ex.id) || []
                   const hint = getSuggestion(ex, historySets)
 
                   return (
-                    <div key={ex.id} style={exerciseCardStyle}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600 }}>{ex.name}</div>
-                        <div style={mutedStyle}>
+                    <div key={ex.id} className="exercise-card">
+                      <div className="workouts-flex-1">
+                        <div className="workouts-fw-600">{ex.name}</div>
+                        <div className="muted">
                           {ex.category} • {ex.muscle} • {ex.equipment}{ex.compound ? ' • Compound' : ''}
                           {ex.createdByUser ? ' • Custom' : ''}
                         </div>
-                        <div style={{ ...mutedStyle, marginTop: 6 }}>{hint}</div>
+                        <div className="muted workouts-mt-6">{hint}</div>
 
                         {/* Inline editor */}
                         {editingId === ex.id && (
-                          <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <div className="row-wrap workouts-mt-10 workouts-gap-8">
                             <input
                               value={editName}
                               onChange={(e) => setEditName(e.target.value)}
-                              style={inputStyle}
+                              className="input"
                               placeholder="Exercise name"
                             />
 
                             <select
                               value={editCategory}
                               onChange={(e) => setEditCategory(e.target.value as ExerciseCategory)}
-                              style={selectStyle}
+                              className="select"
                             >
                               <option value="Strength">Strength</option>
                               <option value="Cardio">Cardio</option>
@@ -764,7 +763,7 @@ export default function Workouts() {
                             <select
                               value={editMuscle}
                               onChange={(e) => setEditMuscle(e.target.value)}
-                              style={selectStyle}
+                              className="select"
                             >
                               {MUSCLE_OPTIONS.map(m => (
                                 <option key={m} value={m}>{m}</option>
@@ -774,7 +773,7 @@ export default function Workouts() {
                             <select
                               value={editEquipment}
                               onChange={(e) => setEditEquipment(e.target.value)}
-                              style={selectStyle}
+                              className="select"
                             >
                               {EQUIPMENT_OPTIONS.map(eq => (
                                 <option key={eq} value={eq}>{eq}</option>
@@ -782,7 +781,7 @@ export default function Workouts() {
                             </select>
 
                             {editCategory === 'Strength' && (
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem' }}>
+                              <label className="workouts-checkbox-label">
                                 <input
                                   type="checkbox"
                                   checked={editCompound}
@@ -792,10 +791,10 @@ export default function Workouts() {
                               </label>
                             )}
 
-                            <button style={primaryStyle} onClick={saveEdit} type="button">
+                            <button className="btn-primary" onClick={saveEdit} type="button">
                               Save
                             </button>
-                            <button style={secondaryStyle} onClick={cancelEdit} type="button">
+                            <button className="btn-secondary" onClick={cancelEdit} type="button">
                               Cancel
                             </button>
                           </div>
@@ -803,9 +802,9 @@ export default function Workouts() {
                       </div>
 
                       {/* Action buttons */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div className="workouts-flex-col workouts-gap-8">
                         <button
-                          style={smallPrimaryStyle}
+                          className="btn-primary small"
                           onClick={() => addExerciseToActive(ex)}
                           title="Add to active workout"
                           type="button"
@@ -814,7 +813,7 @@ export default function Workouts() {
                         </button>
 
                         <button
-                          style={secondaryOutlineStyle}
+                          className="btn-secondary outline"
                           onClick={() => beginEdit(ex)}
                           type="button"
                         >
@@ -822,7 +821,7 @@ export default function Workouts() {
                         </button>
 
                         <button
-                          style={dangerOutlineStyle}
+                          className="btn-danger outline"
                           onClick={() => deleteExercise(ex.id)}
                           type="button"
                         >
@@ -835,18 +834,18 @@ export default function Workouts() {
               </div>
 
               {/* Enhanced Custom exercise row */}
-              <div style={rowWrapAlignStyle}>
+              <div className="row-wrap-align">
                 <input
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder="Create custom exercise..."
-                  style={inputStyle}
+                  className="input"
                 />
 
                 <select
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value as ExerciseCategory)}
-                  style={selectStyle}
+                  className="select"
                 >
                   <option value="Strength">Strength</option>
                   <option value="Cardio">Cardio</option>
@@ -855,7 +854,7 @@ export default function Workouts() {
                 <select
                   value={customMuscle}
                   onChange={(e) => setCustomMuscle(e.target.value)}
-                  style={selectStyle}
+                  className="select"
                   title="Primary body part"
                 >
                   {MUSCLE_OPTIONS.map(m => (
@@ -866,7 +865,7 @@ export default function Workouts() {
                 <select
                   value={customEquipment}
                   onChange={(e) => setCustomEquipment(e.target.value)}
-                  style={selectStyle}
+                  className="select"
                   title="Equipment"
                 >
                   {EQUIPMENT_OPTIONS.map(eq => (
@@ -875,7 +874,7 @@ export default function Workouts() {
                 </select>
 
                 {customCategory === 'Strength' && (
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem' }}>
+                  <label className="workouts-checkbox-label">
                     <input
                       type="checkbox"
                       checked={customCompound}
@@ -885,7 +884,7 @@ export default function Workouts() {
                   </label>
                 )}
 
-                <button style={secondaryStyle} onClick={createCustomExercise} type="button">
+                <button className="btn-secondary" onClick={createCustomExercise} type="button">
                   Add Custom
                 </button>
               </div>
@@ -895,23 +894,23 @@ export default function Workouts() {
 
         {/* ACTIVE */}
         {tab === 'active' && (
-          <div style={{ marginTop: '1.5rem' }}>
+          <div className="workouts-mt-1-5">
             {!active ? (
-              <section style={sectionStyle}>
-                <div style={mutedStyle}>
+              <section className="section">
+                <div className="muted">
                   No active workout. Start one from the Library tab.
                 </div>
-                <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                  <button style={primaryStyle} onClick={() => startWorkout(false)} type="button">Start Workout</button>
-                  <button style={secondaryStyle} onClick={() => startWorkout(true)} type="button">Copy Last</button>
+                <div className="row-wrap workouts-mt-0-75 workouts-gap-0-5">
+                  <button className="btn-primary" onClick={() => startWorkout(false)} type="button">Start Workout</button>
+                  <button className="btn-secondary" onClick={() => startWorkout(true)} type="button">Copy Last</button>
                 </div>
               </section>
             ) : (
               <>
-                <section style={sectionStyle}>
-                  <div style={sectionHeaderStyle}>
-                    <h3 style={sectionTitleStyle}>Active session</h3>
-                    <div style={rowWrapStyle}>
+                <section className="section">
+                  <div className="section-header">
+                    <h3 className="section-title">Active session</h3>
+                    <div className="row-wrap">
                       <input
                         value={active.name}
                         onChange={(e) => {
@@ -920,7 +919,7 @@ export default function Workouts() {
                           setActive(prev => prev ? { ...prev, name: val } : prev)
                         }}
                         placeholder="Workout name"
-                        style={inputStyle}
+                        className="input"
                       />
 
                       {/* Editable active date */}
@@ -932,19 +931,19 @@ export default function Workouts() {
                           setWorkoutDate(val)
                           setActive(prev => prev ? { ...prev, dateISO: dateInputToISO(val) } : prev)
                         }}
-                        style={dateInputStyle}
+                        className="input date"
                         title="Workout date"
                       />
 
-                      <button style={secondaryStyle} onClick={discardWorkout} type="button">Discard</button>
-                      <button style={primaryStyle} onClick={finishWorkout} type="button">Finish</button>
+                      <button className="btn-secondary" onClick={discardWorkout} type="button">Discard</button>
+                      <button className="btn-primary" onClick={finishWorkout} type="button">Finish</button>
                     </div>
                   </div>
                 </section>
 
                 {active.items.length === 0 && (
-                  <section style={sectionStyle}>
-                    <div style={mutedStyle}>Add exercises from the Library to begin logging sets.</div>
+                  <section className="section">
+                    <div className="muted">Add exercises from the Library to begin logging sets.</div>
                   </section>
                 )}
 
@@ -956,28 +955,28 @@ export default function Workouts() {
                   const bodyweightStrength = isBodyweightStrength(ex)
 
                   return (
-                    <section key={item.exerciseId} style={sectionStyle}>
-                      <div style={sectionHeaderStyle}>
+                    <section key={item.exerciseId} className="section">
+                      <div className="section-header">
                         <div>
-                          <h3 style={sectionTitleStyle}>{ex.name}</h3>
-                          <div style={mutedStyle}>
+                          <h3 className="section-title">{ex.name}</h3>
+                          <div className="muted">
                             {ex.category} • {ex.muscle} • {ex.equipment}{ex.compound ? ' • Compound' : ''}
                           </div>
 
-                          <div style={{ ...mutedStyle, marginTop: 6 }}>
+                          <div className="muted workouts-mt-6">
                             <strong>Recommendation:</strong> {hint}
                           </div>
 
                           {bodyweightStrength && (
-                            <div style={{ ...mutedStyle, marginTop: 4 }}>
+                            <div className="muted workouts-mt-4">
                               Tip: Use positive weight for added load and negative for assistance.
                             </div>
                           )}
                         </div>
 
-                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <div className="row-wrap workouts-gap-0-5">
                           <button
-                            style={secondaryStyle}
+                            className="btn-secondary"
                             onClick={() => addSet(item.exerciseId, true)}
                             type="button"
                           >
@@ -985,7 +984,7 @@ export default function Workouts() {
                           </button>
 
                           <button
-                            style={secondaryStyle}
+                            className="btn-secondary"
                             onClick={() => addSet(item.exerciseId, false)}
                             type="button"
                           >
@@ -994,54 +993,54 @@ export default function Workouts() {
                         </div>
                       </div>
 
-                      <div style={{ overflowX: 'auto' }}>
+                      <div className="workouts-overflow-x-auto">
                         {cardio ? (
-                          <table style={tableStyle}>
+                          <table className="workouts-table">
                             <thead>
                               <tr>
-                                <th style={thStyle}>Type</th>
-                                <th style={thStyle}>Duration (min)</th>
-                                <th style={thStyle}>Distance (mi)</th>
-                                <th style={thStyle}>Calories</th>
-                                <th style={thStyle}>RPE (1-10)</th>
-                                <th style={thStyle}>Action</th>
+                                <th>Type</th>
+                                <th>Duration (min)</th>
+                                <th>Distance (mi)</th>
+                                <th>Calories</th>
+                                <th>RPE (1-10)</th>
+                                <th>Action</th>
                               </tr>
                             </thead>
                             <tbody>
                               {item.sets.map((s, idx) => (
                                 <tr key={s.id}>
-                                  <td style={tdStyle}>{s.isWarmup ? 'Easy' : `Interval ${idx + 1}`}</td>
-                                  <td style={tdStyle}>
+                                  <td>{s.isWarmup ? 'Easy' : `Interval ${idx + 1}`}</td>
+                                  <td>
                                     <input
                                       type="number"
                                       min={0}
                                       step={1}
                                       value={s.durationMin ?? 0}
                                       onChange={(e) => updateSet(item.exerciseId, s.id, { durationMin: Number(e.target.value) })}
-                                      style={miniInputStyle}
+                                      className="input mini"
                                     />
                                   </td>
-                                  <td style={tdStyle}>
+                                  <td>
                                     <input
                                       type="number"
                                       min={0}
                                       step={0.1}
                                       value={s.distanceMi ?? 0}
                                       onChange={(e) => updateSet(item.exerciseId, s.id, { distanceMi: Number(e.target.value) })}
-                                      style={miniInputStyle}
+                                      className="input mini"
                                     />
                                   </td>
-                                  <td style={tdStyle}>
+                                  <td>
                                     <input
                                       type="number"
                                       min={0}
                                       step={10}
                                       value={s.calories ?? 0}
                                       onChange={(e) => updateSet(item.exerciseId, s.id, { calories: Number(e.target.value) })}
-                                      style={miniInputStyle}
+                                      className="input mini"
                                     />
                                   </td>
-                                  <td style={tdStyle}>
+                                  <td>
                                     <input
                                       type="number"
                                       min={0}
@@ -1049,12 +1048,12 @@ export default function Workouts() {
                                       step={1}
                                       value={s.rpe ?? 0}
                                       onChange={(e) => updateSet(item.exerciseId, s.id, { rpe: Number(e.target.value) })}
-                                      style={miniInputStyle}
+                                      className="input mini"
                                     />
                                   </td>
-                                  <td style={tdStyle}>
+                                  <td>
                                     <button
-                                      style={dangerStyle}
+                                      className="btn-danger"
                                       onClick={() => removeSet(item.exerciseId, s.id)}
                                       type="button"
                                     >
@@ -1066,22 +1065,22 @@ export default function Workouts() {
                             </tbody>
                           </table>
                         ) : (
-                          <table style={tableStyle}>
+                          <table className="workouts-table">
                             <thead>
                               <tr>
-                                <th style={thStyle}>Type</th>
-                                <th style={thStyle}>
+                                <th>Type</th>
+                                <th>
                                   {bodyweightStrength ? 'Added / Assisted (lbs)' : 'Weight (lbs)'}
                                 </th>
-                                <th style={thStyle}>Reps</th>
-                                <th style={thStyle}>Action</th>
+                                <th>Reps</th>
+                                <th>Action</th>
                               </tr>
                             </thead>
                             <tbody>
                               {item.sets.map((s, idx) => (
                                 <tr key={s.id}>
-                                  <td style={tdStyle}>{s.isWarmup ? 'Warmup' : `Set ${idx + 1}`}</td>
-                                  <td style={tdStyle}>
+                                  <td>{s.isWarmup ? 'Warmup' : `Set ${idx + 1}`}</td>
+                                  <td>
                                     <input
                                       type="number"
                                       min={bodyweightStrength ? -200 : 0}
@@ -1090,10 +1089,10 @@ export default function Workouts() {
                                       onChange={(e) =>
                                         updateSet(item.exerciseId, s.id, { weight: Number(e.target.value) })
                                       }
-                                      style={miniInputStyle}
+                                      className="input mini"
                                     />
                                   </td>
-                                  <td style={tdStyle}>
+                                  <td>
                                     <input
                                       type="number"
                                       min={0}
@@ -1102,12 +1101,12 @@ export default function Workouts() {
                                       onChange={(e) =>
                                         updateSet(item.exerciseId, s.id, { reps: Number(e.target.value) })
                                       }
-                                      style={miniInputStyle}
+                                      className="input mini"
                                     />
                                   </td>
-                                  <td style={tdStyle}>
+                                  <td>
                                     <button
-                                      style={dangerStyle}
+                                      className="btn-danger"
                                       onClick={() => removeSet(item.exerciseId, s.id)}
                                       type="button"
                                     >
@@ -1130,44 +1129,44 @@ export default function Workouts() {
 
         {/* HISTORY */}
         {tab === 'history' && (
-          <div style={{ marginTop: '1.5rem' }}>
-            <section style={sectionStyle}>
-              <div style={sectionHeaderStyle}>
-                <h3 style={sectionTitleStyle}>Past sessions</h3>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <button style={secondaryStyle} onClick={() => startWorkout(true)} type="button">Copy Last</button>
-                  <button style={primaryStyle} onClick={() => startWorkout(false)} type="button">Start New</button>
+          <div className="workouts-mt-1-5">
+            <section className="section">
+              <div className="section-header">
+                <h3 className="section-title">Past sessions</h3>
+                <div className="row-wrap workouts-gap-0-5">
+                  <button className="btn-secondary" onClick={() => startWorkout(true)} type="button">Copy Last</button>
+                  <button className="btn-primary" onClick={() => startWorkout(false)} type="button">Start New</button>
                 </div>
               </div>
 
               {sessions.length === 0 && (
-                <div style={mutedStyle}>No workouts saved yet.</div>
+                <div className="muted">No workouts saved yet.</div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="workouts-flex-col">
                 {sessions.map(ses => {
                   const isOpen = expandedId === ses.id
                   const totalSets = (ses.items || []).reduce((acc, i) => acc + (i.sets?.length || 0), 0)
 
                   return (
-                    <div key={ses.id} style={historyCardStyle}>
-                      <div style={historyLeftStyle}>
-                        <div style={historyTitleStyle}>{ses.name || 'Workout'}</div>
-                        <div style={mutedStyle}>{formatDate(ses.dateISO)}</div>
+                    <div key={ses.id} className="history-card">
+                      <div className="history-left">
+                        <div className="history-title">{ses.name || 'Workout'}</div>
+                        <div className="muted">{formatDate(ses.dateISO)}</div>
 
-                        <div style={{ ...mutedStyle, marginTop: 4 }}>
+                        <div className="muted workouts-mt-4">
                           {(ses.items || []).length} exercises • {totalSets} sets
                         </div>
 
                         {isOpen && (
-                          <div style={{ marginTop: 8 }}>
+                          <div className="workouts-mt-8">
                             {(ses.items || []).map(it => {
                               const ex = getExerciseById(it.exerciseId)
                               return (
-                                <div key={it.exerciseId} style={historyLineStyle}>
+                                <div key={it.exerciseId} className="history-line">
                                   {ex.name}
-                                  <span style={historyMetaStyle}>({ex.category})</span>
-                                  <span style={historyDashStyle}>—</span>
+                                  <span className="history-meta">({ex.category})</span>
+                                  <span className="history-dash">—</span>
                                   {it.sets.length} sets
                                 </div>
                               )
@@ -1176,16 +1175,16 @@ export default function Workouts() {
                         )}
                       </div>
 
-                      <div style={historyActionsStyle}>
+                      <div className="history-actions">
                         <button
-                          style={secondaryOutlineStyle}
+                          className="btn-secondary outline"
                           onClick={() => setExpandedId(prev => prev === ses.id ? null : ses.id)}
                           type="button"
                         >
                           {isOpen ? 'Hide' : 'View'}
                         </button>
                         <button
-                          style={dangerOutlineStyle}
+                          className="btn-danger outline"
                           onClick={() => setSessions(prev => prev.filter(p => p.id !== ses.id))}
                           type="button"
                         >
@@ -1204,315 +1203,3 @@ export default function Workouts() {
   )
 }
 
-/* ----------------- top nav component ----------------- */
-
-function TopNav() {
-  const location = useLocation()
-
-  const links = [
-    { to: '/home', label: 'Home' },
-    { to: '/assignments', label: 'Assignments' },
-    { to: '/exams', label: 'Exams' },
-    { to: '/water', label: 'Water Intake' },
-  ]
-
-  return (
-    <div style={topNavContainerStyle}>
-      <div style={topNavInnerStyle}>
-        {links.map(link => {
-          const isActive = location.pathname === link.to
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              style={isActive ? topNavLinkActiveStyle : topNavLinkStyle}
-            >
-              {link.label}
-            </Link>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-/* ---------- styles ---------- */
-
-const tabsRowStyle: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  marginTop: '1rem',
-  flexWrap: 'wrap'
-}
-
-const rowWrapStyle: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  flexWrap: 'wrap'
-}
-
-const rowWrapAlignStyle: CSSProperties = {
-  marginTop: '1rem',
-  display: 'flex',
-  gap: '0.5rem',
-  alignItems: 'center',
-  flexWrap: 'wrap'
-}
-
-const tabStyle: CSSProperties = {
-  border: '1px solid #E0E0E0',
-  padding: '0.5rem 0.75rem',
-  borderRadius: 10,
-  background: '#F8F9FA',
-  cursor: 'pointer'
-}
-
-const activeTabStyle: CSSProperties = {
-  ...tabStyle,
-  background: '#E21833',
-  color: 'white',
-  borderColor: '#E21833'
-}
-
-const sectionStyle: CSSProperties = {
-  border: '1px solid #E0E0E0',
-  borderRadius: 12,
-  padding: '1rem',
-  marginBottom: '1rem',
-  background: 'white'
-}
-
-const sectionHeaderStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  gap: '1rem',
-  alignItems: 'center',
-  flexWrap: 'wrap'
-}
-
-const sectionTitleStyle: CSSProperties = {
-  margin: 0,
-  fontSize: '1.1rem'
-}
-
-const gridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-  gap: '0.75rem',
-  marginTop: '0.75rem'
-}
-
-const exerciseCardStyle: CSSProperties = {
-  border: '1px solid #E0E0E0',
-  borderRadius: 12,
-  padding: '0.9rem',
-  display: 'flex',
-  justifyContent: 'space-between',
-  gap: '0.75rem',
-  background: '#F8F9FA'
-}
-
-/* ✅ UPDATED history card base */
-const historyCardStyle: CSSProperties = {
-  border: '1px solid #E0E0E0',
-  borderRadius: 12,
-  padding: '0.9rem',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  gap: '1rem',
-  background: '#F8F9FA',
-  textAlign: 'left'
-}
-
-const mutedStyle: CSSProperties = {
-  fontSize: '0.85rem',
-  color: '#555'
-}
-
-const inputStyle: CSSProperties = {
-  padding: '0.5rem 0.6rem',
-  borderRadius: 10,
-  border: '1px solid #E0E0E0',
-  minWidth: 220
-}
-
-const dateInputStyle: CSSProperties = {
-  padding: '0.5rem 0.6rem',
-  borderRadius: 10,
-  border: '1px solid #E0E0E0',
-  background: 'white',
-  minWidth: 160
-}
-
-const miniInputStyle: CSSProperties = {
-  padding: '0.35rem 0.45rem',
-  borderRadius: 8,
-  border: '1px solid #E0E0E0',
-  width: 90
-}
-
-const selectStyle: CSSProperties = {
-  padding: '0.5rem 0.6rem',
-  borderRadius: 10,
-  border: '1px solid #E0E0E0',
-  background: 'white'
-}
-
-const primaryStyle: CSSProperties = {
-  background: '#E21833',
-  color: 'white',
-  border: '1px solid #E21833',
-  padding: '0.5rem 0.8rem',
-  borderRadius: 10,
-  cursor: 'pointer'
-}
-
-const smallPrimaryStyle: CSSProperties = {
-  ...primaryStyle,
-  padding: '0.35rem 0.6rem',
-  fontSize: '0.85rem'
-}
-
-const secondaryStyle: CSSProperties = {
-  background: '#FFD200',
-  color: 'black',
-  border: '1px solid #FFD200',
-  padding: '0.5rem 0.8rem',
-  borderRadius: 10,
-  cursor: 'pointer'
-}
-
-const secondaryOutlineStyle: CSSProperties = {
-  background: '#fff',
-  color: '#111',
-  border: '1px solid #DDD',
-  padding: '0.45rem 0.7rem',
-  borderRadius: 8,
-  cursor: 'pointer',
-  fontSize: '0.85rem'
-}
-
-const dangerStyle: CSSProperties = {
-  background: '#fff',
-  color: '#b00020',
-  border: '1px solid #b00020',
-  padding: '0.3rem 0.5rem',
-  borderRadius: 8,
-  cursor: 'pointer',
-  fontSize: '0.8rem'
-}
-
-const dangerOutlineStyle: CSSProperties = {
-  ...dangerStyle,
-  padding: '0.45rem 0.7rem'
-}
-
-const filterStyle: CSSProperties = {
-  border: '1px solid #E0E0E0',
-  padding: '0.25rem 0.5rem',
-  borderRadius: 999,
-  background: '#F8F9FA',
-  cursor: 'pointer',
-  fontSize: '0.8rem'
-}
-
-const filterActiveStyle: CSSProperties = {
-  ...filterStyle,
-  background: '#111',
-  color: 'white',
-  borderColor: '#111'
-}
-
-const tableStyle: CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  marginTop: '0.75rem'
-}
-
-const thStyle: CSSProperties = {
-  textAlign: 'left',
-  fontSize: '0.85rem',
-  borderBottom: '1px solid #E0E0E0',
-  padding: '0.5rem 0.4rem'
-}
-
-const tdStyle: CSSProperties = {
-  padding: '0.5rem 0.4rem',
-  borderBottom: '1px solid #EEE',
-  fontSize: '0.9rem'
-}
-
-/* ---------- history detail layout styles (NEW) ---------- */
-
-const historyLeftStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 2,
-  textAlign: 'left',
-  minWidth: 0
-}
-
-const historyTitleStyle: CSSProperties = {
-  fontWeight: 700,
-  fontSize: '1.05rem'
-}
-
-const historyLineStyle: CSSProperties = {
-  ...mutedStyle,
-  marginTop: 4,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 6,
-  flexWrap: 'wrap'
-}
-
-const historyMetaStyle: CSSProperties = {
-  opacity: 0.85
-}
-
-const historyDashStyle: CSSProperties = {
-  opacity: 0.6
-}
-
-const historyActionsStyle: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  alignItems: 'flex-start',
-  flexShrink: 0
-}
-
-/* ---------- top nav styles ---------- */
-
-const topNavContainerStyle: CSSProperties = {
-  marginTop: '0.75rem',
-  marginBottom: '1rem',
-  padding: '0.6rem',
-  borderRadius: 12,
-  border: '1px solid #E0E0E0',
-  background: '#FFFFFF',
-}
-
-const topNavInnerStyle: CSSProperties = {
-  display: 'flex',
-  gap: '0.5rem',
-  flexWrap: 'wrap',
-}
-
-const topNavLinkStyle: CSSProperties = {
-  textDecoration: 'none',
-  padding: '0.35rem 0.7rem',
-  borderRadius: 999,
-  border: '1px solid #E0E0E0',
-  background: '#F8F9FA',
-  color: '#111',
-  fontSize: '0.85rem',
-  fontWeight: 500,
-}
-
-const topNavLinkActiveStyle: CSSProperties = {
-  ...topNavLinkStyle,
-  background: '#E21833',
-  borderColor: '#E21833',
-  color: 'white',
-}
